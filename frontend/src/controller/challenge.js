@@ -15,10 +15,8 @@ const Challenges = () => {
     fetchUserId();
   }, []);
 
-  const fetchUserId = () => {
-    const username = 'req.params.username'; 
-
-    fetch(`http://localhost:3001/api/get-user/${username}`)
+  const fetchUserId = (userID) => {
+    fetch(`http://localhost:3001/api/get-user/${userID}`)
       .then(response => response.json())
       .then(data => {
         if (data.userId) {
@@ -157,7 +155,7 @@ const Challenges = () => {
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.badge_id}</td>
                 <td>
-                  <button onClick={() => joinChallenge(challenge.id)}>Join</button>
+                  <button onClick={() => joinChallenge(challenge.challenge_id)}>Join</button>
                 </td>
               </tr>
             ))
