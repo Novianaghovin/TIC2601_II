@@ -1,0 +1,102 @@
+/* badge.css */
+
+body {
+    font-family: 'Roboto', sans-serif; /* Change to a nicer font */
+    text-align: center;
+    background-color: #e9ecef; /* Light gray background */
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #343a40; /* Dark color for the heading */
+    font-size: 2.5em; /* Larger font size for prominence */
+    margin-bottom: 20px; /* Space below the title */
+}
+
+/* Container for all badges */
+.badge-list {
+    display: grid; /* Use grid for better layout */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive layout */
+    gap: 20px; /* Space between badges */
+    justify-items: center; /* Center badges */
+}
+
+/* Individual badge container */
+.badge-container {
+    border: 2px solid #ccc; /* Light gray border */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    width: 180px; /* Set width */
+    background-color: #fff; /* White background */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+}
+
+.badge-container:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+}
+
+/* Differentiation for achieved and not achieved badges */
+.badge-container.achieved {
+    border-color: #28a745; /* Green border for achieved */
+}
+
+.badge-container.not-achieved {
+    border-color: #6c757d; /* Gray border for not achieved */
+}
+
+/* Badge icon styling */
+.badge-icon img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* Circular badges */
+    border: 3px solid #fff; /* White border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Title of each badge */
+.badge-info p:first-child {
+    font-weight: bold;
+    font-size: 1.2em; /* Slightly larger font for badge name */
+    margin: 10px 0 5px; /* Margin for spacing */
+}
+
+/* Achievement status text */
+.badge-info p {
+    font-size: 0.9em; /* Standard font size */
+    color: #666; /* Gray color for description */
+}
+
+/* Specific color for achievement date */
+.badge-container.achieved .badge-info p:last-child {
+    color: #28a745; /* Green for achieved date */
+}
+
+.badge-container.not-achieved .badge-info p:last-child {
+    color: #999; /* Light gray for not achieved */
+}
+
+/* Style for the month selector */
+label {
+    margin-right: 10px; /* Space between label and dropdown */
+    font-weight: bold; /* Bold label */
+}
+
+select {
+    padding: 8px; /* Padding for the dropdown */
+    font-size: 1em; /* Font size for the dropdown */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ccc; /* Border for the dropdown */
+}
+
+/* Add this to your existing CSS */
+
+.month-selector {
+    margin-bottom: 30px; /* Add space below the month selector */
+}
+
+.badge-list {
+    margin-top: 20px; /* Optional: add some space above the badge list as well */
+}
