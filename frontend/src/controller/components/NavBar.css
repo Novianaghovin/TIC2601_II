@@ -1,0 +1,44 @@
+/* Container for the navbar */
+.navbar {
+    display: flex;
+    justify-content: center; /* Center align the buttons horizontally */
+    align-items: center;
+    background-color: white;
+    padding: 10px;
+    width: 100%;
+    position: fixed; /* Fix to the top of the page */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Keep on top of other elements */
+    padding: 10px; /* Add some padding to the navbar */
+    border-bottom: 2px solid #007bff; /* Optional: Add a border at the bottom */
+  }
+  
+  /* Style for buttons */
+  .nav-button {
+    background-color: #007bff; /* Blue color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Remove margin from the last button */
+  .nav-button:last-child {
+    margin-right: 0;
+  }
+  
+  /* Style for the active challenge button */
+  .nav-button.active {
+    background-color: #00b300; /* Green for active button */
+  }
+  
+  /* Hover effect for buttons */
+  .nav-button:hover {
+    background-color: #0056b3;
+  }
+  
