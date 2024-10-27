@@ -6,11 +6,11 @@ GUIDE TO VIEW MY CHALLENGES WEB UI
 
 
 3) Open up 2 terminals tab side by side preferably, 
-one of the terminal you type **>cd public** 
-the other terminal you type **>cd my-app**
+one of the terminal you type **>cd backend** 
+the other terminal you type **>cd frontend**
 
-4) For the 'public' terminal, you type >**node server.js** to start the backend service
-5) For the 'my-app' terminal, you type >**npm start** to start the react js service -> it will open up the challenges web UI automatically
+4) For the 'backend' terminal, you type >**node challenges.js** to start the backend service
+5) For the 'frontend' terminal, you type >**npm start** to start the react js service -> it will open up the challenges web UI automatically
 
 
 LOGS 
