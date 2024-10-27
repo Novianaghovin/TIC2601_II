@@ -47,6 +47,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             responder_id INTEGER NOT NULL,                         
             requester_id INTEGER NOT NULL,                         
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status TEXT NOT NULL CHECK (status IN('Accepted', 'Pending', 'Rejected')),
 
             FOREIGN KEY (responder_id) REFERENCES users_registration(user_id) ON DELETE CASCADE,
             FOREIGN KEY (requester_id) REFERENCES users_registration(user_id) ON DELETE CASCADE,
