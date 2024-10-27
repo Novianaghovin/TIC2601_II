@@ -23,8 +23,7 @@ router.use(isAuthenticated);
 
 // SEARCH FOR USER BY EMAIL IN ORDER TO SEND FRIEND REQUEST
 // In Postman: http://localhost:3000/friendship/search?email=<user_email>
-// (replace <user_email> with the actual email you're searching for)
-
+// replace <user_email> with the actual email searching for
 router.get('/search', (req, res) => {
     const { email } = req.query;    // search for another use by email
 
@@ -47,6 +46,10 @@ router.get('/search', (req, res) => {
 
 
 // SEND FRIENDSHIP REQUEST
+/**
+ * Pre-conditions: set-up new environment in Postman. Set 'Variable' to "responder_id" and 'Type' = default
+ * In body, type in { "responder_id": "{{responder_id}} "
+ */
 router.post('/request', (req, res) => {
     const responder_id = String(req.body.responder_id);
     const requester_id = String(req.session.userID);    // Use the user ID from the session as the requester_id
