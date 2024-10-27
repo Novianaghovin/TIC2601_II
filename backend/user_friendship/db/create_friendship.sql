@@ -4,8 +4,8 @@ CREATE TABLE friendship (
     requester_id INTEGER NOT NULL,                         
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (responder_id) REFERENCES users_registration(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (requester_id) REFERENCES users_registration(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (responder_id) REFERENCES user_registration(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (requester_id) REFERENCES user_registration(user_id) ON DELETE CASCADE,
     UNIQUE (responder_id, requester_id)
 );
 
