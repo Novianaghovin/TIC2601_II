@@ -60,36 +60,15 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         }
     });    
         
-        // Create the use challenges table pend YK confirmation
-        
-    /* db.run(`
-        CREATE TABLE user_challenges (
-            user_challenge_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            user_id INTEGER NOT NULL,               
-            challenge_id INTEGER NOT NULL,          
-            completion_status VARCHAR(50),        
-            progress INTEGER,                    
-            start_date DATE,                       
-            end_date DATE,                          
-            FOREIGN KEY (user_id) REFERENCES User_Registration(user_id),        
-            FOREIGN KEY (challenge_id) REFERENCES Challenges(challenge_id)  
-        )`, (err) => {
-            if (err) {
-                console.error('Error creating Badge_Records table:', err.message);
-            } else {
-                console.log('Badge_Records table created or already exists.');
-            }
-    });  */
-     
-        // since we agree that badge name == challenge name there is no need to input badge name in badge_records database
     db.run(`
         CREATE TABLE IF NOT EXISTS badge_records (
             badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             challenge_id INTEGER,
-            achieved_date DATE,
-            FOREIGN KEY (user_id) REFERENCES User_Profile(user_id),
-            FOREIGN KEY (challenge_id) REFERENCES Challenge(challenge_id)
+            badge_name TEXT NOT NULL,
+            achieved_date DATE DEFAULT (CURRENT_DATE),
+            FOREIGN KEY (user_id) REFERENCES User_Profile(user_id) ON DELETE CASCADE ,
+            FOREIGN KEY (challenge_id) REFERENCES Challenge(challenge_id) ON DELETE CASCADE 
     )`, (err) => {
         if (err) {
             console.error('Error creating Badge_Records table:', err.message);
@@ -97,7 +76,28 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             console.log('Badge_Records table created or already exists.');
         }
     });
+    
+        //leaderboard - a person who have completed the challenge will be displayed in leaderboard as a rank
+    db.run(`
+        CREATE TABLE IF NOT EXISTS leaderboard (
+            leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rank INTEGER NOT NULL,
+            challenge_id INTEGER,
+            user_id INTEGER,
+            distance DECIMAL(5, 2) NOT NULL,
+            time DECIMAL(5, 2) NOT NULL,
+            achieved_date DATE DEFAULT (CURRENT_DATE),
+            FOREIGN KEY (challenge_id) REFERENCES Challenge(challenge_id) ON DELETE CASCADE ,
+            FOREIGN KEY (user_id) REFERENCES User_Profile(user_id) ON DELETE CASCADE
 
+    )`, (err) => {
+        if (err) {
+            console.error('Error creating Badge_Records table:', err.message);
+        } else {
+            console.log('Badge_Records table created or already exists.');
+        }
+    });        
+    
     }
 });
 
