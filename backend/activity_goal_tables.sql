@@ -8,7 +8,7 @@ CREATE TABLE activity_log (
     log_id INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_duration INTEGER NOT NULL CHECK(activity_duration > 0),
     distance DECIMAL(5, 2) NOT NULL CHECK(distance > 0),
-    step_count INTEGER NOT NULL CHECK(step_count > 0),
+    step_count INTEGER NOT NULL DEFAULT 0 CHECK(step_count >= 0),
     calories_burnt DECIMAL(5, 2),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     activity_id INTEGER,
@@ -45,8 +45,8 @@ INSERT INTO activity_type (activity_name, activity_multiplier) VALUES
 
 INSERT INTO activity_log (activity_duration, distance, step_count, calories_burnt, activity_id, user_id) VALUES 
 (30, 5.00, 4000, 300.00, 1, 1),  -- Running for 30 mins
-(60, 1.00, 2000, 350.00, 2, 1),  -- Swimming for 60 mins
-(45, 15.00, 7000, 450.00, 3, 1), -- Cycling for 45 mins
+(60, 1.00, 0, 350.00, 2, 1),  -- Swimming for 60 mins
+(45, 15.00, 0, 450.00, 3, 1), -- Cycling for 45 mins
 (30, 2.00, 3000, 150.00, 4, 1);  -- Walking for 30 mins
 
 INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VALUES 
