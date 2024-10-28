@@ -1,7 +1,8 @@
 CREATE TABLE friendship (
     friendship_id INTEGER PRIMARY KEY AUTOINCREMENT,  
     responder_id INTEGER NOT NULL,                         
-    requester_id INTEGER NOT NULL,                         
+    requester_id INTEGER NOT NULL, 
+    status TEXT NOT NULL CHECK (status IN('Accepted', 'Pending', 'Rejected')),                         
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (responder_id) REFERENCES user_registration(user_id) ON DELETE CASCADE,
