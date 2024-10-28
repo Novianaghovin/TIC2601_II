@@ -1,4 +1,4 @@
---badge name == challenge name . achieved_date
+
 CREATE TABLE IF NOT EXISTS badge_records (
             badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
