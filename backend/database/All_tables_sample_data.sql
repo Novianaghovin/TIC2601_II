@@ -247,6 +247,12 @@ INSERT INTO badge_records (user_id, challenge_id, badge_name, achieved_date) VAL
 (2, 2, 'Nov 2024 5km Run Challenge', '2023-11-30'),
 (3, 3, 'Dec 2024 5km Run Challenge ', '2023-12-31');
 
+INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VALUES 
+('Run 5 km', '2025-03-31', 0.00, 1, 1),
+('Swim 2 km', '2025-02-28', 0.00, 1, 2),
+('Cycle 50 km', '2025-01-31', 0.00, 1, 3),
+('Walk 10,000 steps', '2025-01-15', 0.00, 1, 4);
+
 INSERT INTO leaderboard (rank, challenge_id, user_id, distance, time, achieved_date) VALUES
 (1, 1, 1, 5.00, 25.00, '2024-01-01'),
 (2, 2, 2, 20.00, 60.00, '2024-01-02'),
