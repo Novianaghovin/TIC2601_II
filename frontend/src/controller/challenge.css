@@ -13,35 +13,6 @@ body {
     margin-bottom: 20px;
   }
   
-  /* Set the container to be the full viewport height and use flexbox to center the content */
-  .container2 {
-    display: flex;
-    justify-content: center;  /* Horizontally centers the content */
-    align-items: center;      /* Vertically centers the content */
-    height: 100vh;            /* Full viewport height */
-  }
-  
-  /* Optional: Style for the input box */
-  input[type="text"] {
-    padding: 5px;
-    font-size: 18px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    width: 250px; /* Set a width for the input */
-  }
-  
-  /* Optional: Style for the submit button */
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-left: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-  }
-  
   /* Container to give padding and center content */
   .container {
     max-width: 1200px;
