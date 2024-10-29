@@ -1,109 +1,170 @@
-// YK WILL EDIT THIS
+import React, { useState, useEffect } from 'react';
+import NavBar from './components/NavBar';
+import "./challenge.css";
 
-// Create the main container for the page
-const app = document.createElement('div');
-app.className = 'app';
 
-// Create a menu section
-const menu = document.createElement('div');
-menu.className = 'menu';
+const Challenges = () => {
+  const [userId, setUserId] = useState(null); // State to store userId fetched from the backend
+  const [challenges, setChallenges] = useState([]); // "My Challenges"
+  const [availableChallenges, setAvailableChallenges] = useState([]); // "Available Challenges"
 
-// Create menu buttons
-const buttons = ['My Profile', 'My Activity', 'My Goals', 'Friend', 'My Badge', 'Challenge'];
-buttons.forEach(buttonText => {
-    const button = document.createElement('button');
-    button.innerText = buttonText;
-    button.id = buttonText.replace(/\s+/g, '').toLowerCase() + 'Btn'; // Set button ID
-    menu.appendChild(button);
-});
+  // Fetch both "My Challenges" and "Available Challenges" when the component mounts
+  useEffect(() => {
+    fetchMyChallenges();
+    fetchAvailableChallenges();
+    fetchUserId();
+  }, []);
 
-// Append the menu to the main container
-app.appendChild(menu);
+  const fetchUserId = (userID) => {
+    fetch(`http://localhost:3001/api/get-user/${userID}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.userId) {
+          setUserId(data.userId); // Set the fetched userId in the state
+          fetchMyChallenges(data.userId); // Fetch challenges with the fetched userId
+          fetchAvailableChallenges(); // Fetch available challenges 
+        } else {
+          console.error('Error: User ID not found');
+        }
+      })
+      .catch(error => console.error('Error fetching user ID:', error));
+  };
 
-// Create a container for the challenges
-const container = document.createElement('div');
-container.className = 'container';
+  // Fetch "My Challenges" from the API
+  const fetchMyChallenges = (userId) => {
+    fetch(`http://localhost:3001/api/my-challenges/${userId}`)
+      .then(response => response.json())
+      .then(data => setChallenges(data)) // Set the state with the challenges the user has joined
+      .catch(error => console.error('Error fetching my challenges:', error));
+  };
 
-// Create header for "My Challenge"
-const myChallengeHeader = document.createElement('h2');
-myChallengeHeader.innerText = 'My Challenge';
-container.appendChild(myChallengeHeader);
+  // Fetch "Available Challenges" from the API
+  const fetchAvailableChallenges = () => {
+    fetch('http://localhost:3001/api/available-challenges') // Update with your real API endpoint
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch Available Challenges');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setAvailableChallenges(data); // Set the "Available Challenges" data in the state
+      })
+      .catch(error => console.error('Error fetching available challenges:', error));
+  };
 
-// Create table for My Challenges
-const myChallengesTable = document.createElement('table');
-myChallengesTable.className = 'table';
-const myChallengesThead = document.createElement('thead');
-const myChallengesHeaderRow = document.createElement('tr');
-['Challenge Type', 'Challenge Name', 'Challenge Deadline', 'Participant Number', ''].forEach(text => {
-    const th = document.createElement('th');
-    th.innerText = text;
-    myChallengesHeaderRow.appendChild(th);
-});
-myChallengesThead.appendChild(myChallengesHeaderRow);
-myChallengesTable.appendChild(myChallengesThead);
-const myChallengesTbody = document.createElement('tbody');
-myChallengesTable.appendChild(myChallengesTbody);
-container.appendChild(myChallengesTable);
+  const joinChallenge = (challengeId) => {
+    console.log('Join button clicked for challenge ID:', challengeId);
+    if (!userId) {
+      console.error('Error: User ID not available');
+      return;
+    }
+    fetch(`http://localhost:3001/api/join-challenge/${userId}/${challengeId}`, {
+      method: 'POST'
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to join the challenge');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Update available and my challenges after joining
+          fetchAvailableChallenges();
+          fetchMyChallenges(userId);
+          alert(`Successfully joined the challenge!`);
+        } else {
+          alert(data.message); // Display message if there's any error
+        }
+      })
+      .catch(error => console.error('Error joining challenge:', error));
+  };
+  
 
-// Create header for "Looking to join other challenge?"
-const availableChallengesHeader = document.createElement('h2');
-availableChallengesHeader.innerText = 'Looking to join other challenge?';
-container.appendChild(availableChallengesHeader);
+  return (
+    <div className="Challenges">
+    <NavBar />
 
-// Create table for Available Challenges
-const availableChallengesTable = document.createElement('table');
-availableChallengesTable.className = 'table';
-const availableChallengesThead = document.createElement('thead');
-const availableChallengesHeaderRow = document.createElement('tr');
-['Challenge Type', 'Challenge Name', 'Challenge Deadline', 'Participants', 'Join'].forEach(text => {
-    const th = document.createElement('th');
-    th.innerText = text;
-    availableChallengesHeaderRow.appendChild(th);
-});
-availableChallengesThead.appendChild(availableChallengesHeaderRow);
-availableChallengesTable.appendChild(availableChallengesThead);
-const availableChallengesTbody = document.createElement('tbody');
-availableChallengesTable.appendChild(availableChallengesTbody);
-container.appendChild(availableChallengesTable);
+    <div className="container">
+      <h1>My Challenges</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Challenge ID</th>
+            <th>Challenge Type</th>
+            <th>Challenge Name</th>
+            <th>Challenge Deadline</th>
+            <th>Activity ID</th>
+            <th>Participants</th>
+            <th>Badge ID</th>
+            <th>Status</th>
+            <th>Leaderboard</th>
+          </tr>
+        </thead>
+        <tbody>
+          {challenges.length === 0 ? (
+            <tr>
+              <td colSpan="8">You haven't joined any challenges yet.</td>
+            </tr>
+          ) : (
+            challenges.map(challenge => (
+              <tr key={challenge.id}>
+                <td>{challenge.challenge_id}</td>
+                <td>{challenge.challenge_type}</td>
+                <td>{challenge.challenge_name}</td>
+                <td>{challenge.challenge_deadline}</td>
+                <td>{challenge.activity_id}</td>
+                <td>{challenge.participants_num || 'N/A'}</td>
+                <td>{challenge.badge_id}</td>
+                <td>{challenge.status || 'Active'}</td>
+                <td>
+                  <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.id)}>Leaderboard</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
 
-// Append the container to the main app
-app.appendChild(container);
-document.body.appendChild(app);
+      <h1>Available Challenges</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Challenge ID</th>
+            <th>Challenge Type</th>
+            <th>Challenge Name</th>
+            <th>Challenge Deadline</th>
+            <th>Activity ID</th>
+            <th>Badge ID</th>
+            <th>Join</th>
+          </tr>
+        </thead>
+        <tbody>
+          {availableChallenges.length === 0 ? (
+            <tr>
+              <td colSpan="7">No challenges available.</td>
+            </tr>
+          ) : (
+            availableChallenges.map(challenge => (
+              <tr key={challenge.id}>
+                <td>{challenge.challenge_id}</td>
+                <td>{challenge.challenge_type}</td>
+                <td>{challenge.challenge_name}</td>
+                <td>{challenge.challenge_deadline}</td>
+                <td>{challenge.activity_id}</td>
+                <td>{challenge.badge_id}</td>
+                <td>
+                  <button onClick={() => joinChallenge(challenge.challenge_id)}>Join</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+    </div>
+  );
+};
 
-// Fetching My Challenges from the backend
-fetch('/api/my-challenges')
-    .then(response => response.json())
-    .then(data => {
-        data.forEach(challenge => {
-            const row = myChallengesTbody.insertRow();
-            row.insertCell(0).innerText = challenge.type;
-            row.insertCell(1).innerText = challenge.name;
-            row.insertCell(2).innerText = challenge.deadline;
-            row.insertCell(3).innerText = challenge.participants;
-            row.insertCell(4).innerHTML = '<button class="btn">Leaderboard</button>';
-        });
-    });
-
-// Fetching Available Challenges from the backend
-fetch('/api/available-challenges')
-    .then(response => response.json())
-    .then(data => {
-        data.forEach(challenge => {
-            const row = availableChallengesTbody.insertRow();
-            row.insertCell(0).innerText = challenge.type;
-            row.insertCell(1).innerText = challenge.name;
-            row.insertCell(2).innerText = challenge.deadline;
-            row.insertCell(3).innerText = challenge.participants;
-            row.insertCell(4).innerHTML = `<button class="btn join-btn" onclick="joinChallenge(${challenge.id})">Join</button>`;
-        });
-    });
-
-// Function to join a challenge
-function joinChallenge(id) {
-    fetch(`/api/join-challenge/${id}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            alert('Joined Challenge successfully');
-            location.reload(); // Reload page to refresh the data
-        });
-}
+export default Challenges;
