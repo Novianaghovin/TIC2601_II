@@ -9,9 +9,6 @@ const port = 3001;
 /* To handle browser incompatibility */ 
 app.use(cors());
 
-// Middleware to parse JSON
-//app.use(express.json());
-
 // Define the path to the existing database file
 const DB_PATH = path.resolve(__dirname, 'database.db');
 
