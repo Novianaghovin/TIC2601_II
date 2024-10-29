@@ -74,17 +74,39 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 
         // Create activity_log table
         db.run(`
-            CREATE TABLE activity_log (
-                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                activity_duration INTEGER NOT NULL CHECK(activity_duration > 0),
-                distance DECIMAL(5, 2) NOT NULL CHECK(distance > 0),
-                step_count INTEGER NOT NULL DEFAULT 0 CHECK(step_count >= 0),
-                calories_burnt DECIMAL(5, 2),
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                activity_id INTEGER,
+        CREATE TABLE activity_log (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            activity_duration INTEGER NOT NULL CHECK(activity_duration > 0),
+            distance DECIMAL(5, 2) NOT NULL CHECK(distance > 0),
+            step_count INTEGER NOT NULL DEFAULT 0 CHECK(step_count >= 0),
+            calories_burnt DECIMAL(5, 2),
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            activity_id INTEGER,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
+                ON DELETE CASCADE 
+                ON UPDATE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
+                ON DELETE CASCADE 
+                ON UPDATE CASCADE
+            );
+        `);
+        
+        // Create goals table
+        db.run(`
+            CREATE TABLE goals (
+                goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                goal_name TEXT NOT NULL,
+                goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
+                progress DECIMAL(5, 2),
                 user_id INTEGER NOT NULL,
-                FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (user_id) REFERENCES user_registration(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+                activity_id INTEGER,
+                FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
+                    ON DELETE CASCADE 
+                    ON UPDATE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
+                    ON DELETE CASCADE 
+                    ON UPDATE CASCADE
             );
         `);
 
@@ -108,7 +130,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 badge_id INTEGER,
                 user_id INTEGER,
                 challenge_id INTEGER,
-                badge_name TEXT NOT NULL,
+                badge_name VARCHAR(50) NOT NULL,
                 achieved_date DATE DEFAULT (CURRENT_DATE),
                 FOREIGN KEY (badge_id) REFERENCES challenge(badge_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES leaderboard(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
