@@ -6,11 +6,12 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-/* To handle browser incompatibility */ 
+/* Middleware */ 
 app.use(cors());
+app.use(express.json());
 
 // Define the path to the existing database file
-const DB_PATH = path.resolve(__dirname, 'database.db');
+const DB_PATH = path.resolve(__dirname, '../database/database.db');
 
 // Connect to the existing database instance
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -114,10 +115,7 @@ app.get('/api/get-user/:userID', (req, res) => {
     });
 });
 
-
-  
-
 // Start the server
-app.listen(3001, () => {
-    console.log('Server is running on http://localhost:3001');
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
