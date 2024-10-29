@@ -1,10 +1,11 @@
 
 CREATE TABLE badge_records (
-            badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            badge_id INTEGER,
             user_id INTEGER,
             challenge_id INTEGER,
             badge_name TEXT NOT NULL,
             achieved_date DATE DEFAULT (CURRENT_DATE),
+            FOREIGN KEY (badge_id) REFERENCES challenge(badge_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (challenge_id) REFERENCES user_challenges(user_challenge_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
