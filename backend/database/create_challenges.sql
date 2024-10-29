@@ -1,4 +1,4 @@
- CREATE TABLE IF NOT EXISTS avail_challenges (
+ CREATE TABLE avail_challenges (
     challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
     challenge_type VARCHAR(50) NOT NULL,
     challenge_name VARCHAR(256) NOT NULL,
