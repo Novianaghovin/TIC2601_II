@@ -11,7 +11,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     } else {
         console.log('Connected to the SQLite database.');
 
-    // PLEASE ADD YOUR DATABASE BELOW
     
         // Create user_registration table
      db.run(`
@@ -59,7 +58,8 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             console.log('Badge_Records table created or already exists.');
         }
     });    
-        
+
+     // create the badge_records   
     db.run(`
         CREATE TABLE IF NOT EXISTS badge_records (
             badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +79,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         }
     });
     
-        //leaderboard - a person who have completed the challenge will be displayed in leaderboard as a rank
+    // create leaderboard - a person who have completed the challenge will be displayed in leaderboard as a rank
     db.run(`
         CREATE TABLE IF NOT EXISTS leaderboard (
             leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
