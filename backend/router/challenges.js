@@ -51,7 +51,6 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
       }
   
       // Insert new entry if not already joined
-      const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Format for SQLite datetime
       db.run('INSERT INTO user_challenges (user_id, challenge_id, status) VALUES (?, ?, ?)',
         [userId, challengeId, 'Active'], function(err) {
           if (err) {
