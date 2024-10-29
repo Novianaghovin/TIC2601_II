@@ -119,11 +119,11 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         db.run(`
             CREATE TABLE IF NOT EXISTS leaderboard (
                 leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                rank INTEGER NOT NULL,
+                rank INTEGER NOT NULL CHECK (rank > 0),
                 challenge_id INTEGER,
                 user_id INTEGER,
-                distance DECIMAL(5, 2) NOT NULL,
-                time DECIMAL(5, 2) NOT NULL,
+                distance DECIMAL(5, 2) NOT NULL CHECK (rank > 0),
+                time DECIMAL(5, 2) NOT NULL CHECK (rank > 0),
                 achieved_date DATE DEFAULT (CURRENT_DATE),
                 FOREIGN KEY (challenge_id) REFERENCES user_challenges(user_challenge_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON DELETE CASCADE ON UPDATE CASCADE
