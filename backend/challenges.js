@@ -6,11 +6,14 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-/* To handle FE and BE different ports issue */ 
+/* To handle browser incompatibility */ 
 app.use(cors());
 
+// Middleware to parse JSON
+//app.use(express.json());
+
 // Define the path to the existing database file
-const DB_PATH = path.resolve(__dirname, 'challenges.db');
+const DB_PATH = path.resolve(__dirname, 'database.db');
 
 // Connect to the existing database instance
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -26,7 +29,7 @@ app.use(express.json());
 
 // Route to fetch available challenges 
 app.get('/api/available-challenges', (req, res) => {
-    const sql = `SELECT * FROM Challenges`; // Adjust the condition based on your data structure
+    const sql = `SELECT * FROM avail_challenges`; // Adjust the condition based on your data structure
     db.all(sql, [], (err, rows) => {
         if (err) {
             console.error('Error fetching available challenges:', err.message);
@@ -42,7 +45,7 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
     const { userId, challengeId } = req.params;
   
     // Check if the user is already part of the challenge
-    db.get('SELECT * FROM User_Challenges WHERE user_id = ? AND challenge_id = ?', [userId, challengeId], (err, row) => {
+    db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ?', [userId, challengeId], (err, row) => {
       if (err) {
         console.error('Error checking existing entry:', err.message);
         return res.status(500).json({ success: false, message: 'Database query failed' });
@@ -54,8 +57,8 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
   
       // Insert new entry if not already joined
       const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Format for SQLite datetime
-      db.run('INSERT INTO User_Challenges (user_id, challenge_id, completion_status, progress, start_date) VALUES (?, ?, ?, ?, ?)',
-        [userId, challengeId, 'Active', 0, currentDate], function(err) {
+      db.run('INSERT INTO user_challenges (user_id, challenge_id, status) VALUES (?, ?, ?)',
+        [userId, challengeId, 'Active'], function(err) {
           if (err) {
             console.error('Error joining challenge:', err.message);
             return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
@@ -73,9 +76,9 @@ app.get('/api/my-challenges/:userId', (req, res) => {
 
     // SQL query to fetch the challenges that the user has joined
     const sql = `
-        SELECT c.*
-        FROM Challenges c
-        JOIN User_Challenges uc ON c.challenge_id = uc.challenge_id
+        SELECT uc.*
+        FROM user_challenges uc
+        JOIN avail_challenges ac ON uc.challenge_id = ac.challenge_id
         WHERE uc.user_id = ? `;
 
     db.all(sql, [userId], (err, rows) => {
@@ -103,7 +106,7 @@ app.get('/api/get-user/:userID', (req, res) => {
     console.log('Fetching user with ID:', userIDInt);
 
     // Query the database to fetch the user_id from the User_Profile table
-    db.get('SELECT user_id FROM User_Profile WHERE user_id = ?', [userIDInt], (err, row) => {
+    db.get('SELECT user_id FROM user_profile WHERE user_id = ?', [userIDInt], (err, row) => {
         if (err) {
             console.error('Database error:', err);
             res.status(500).json({ error: 'Database query failed' });

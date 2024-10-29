@@ -117,7 +117,7 @@ const Challenges = () => {
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
                 <td>{challenge.badge_id}</td>
-                <td>{challenge.completion_status || 'Active'}</td>
+                <td>{challenge.status || 'Active'}</td>
                 <td>
                   <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.id)}>Leaderboard</button>
                 </td>

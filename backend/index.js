@@ -37,8 +37,6 @@ app.get('/profile', (req, res) => {
     });
 });
 
-
-
 // Add a new user example of it
 /*app.post('/users', (req, res) => {
     const { name, email } = req.body;
