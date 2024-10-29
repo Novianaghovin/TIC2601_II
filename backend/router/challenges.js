@@ -21,9 +21,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-// Middleware to parse JSON
-app.use(express.json());
-
 // Route to fetch available challenges 
 app.get('/api/available-challenges', (req, res) => {
     const sql = `SELECT * FROM avail_challenges`; // Adjust the condition based on your data structure
