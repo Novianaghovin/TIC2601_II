@@ -36,11 +36,11 @@ app.get('/api/available-challenges', (req, res) => {
 });
 
 // Route for users to join a challenge
-app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
-    const { userId, challengeId } = req.params;
+app.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
+    const { userId, challengeId, activityId } = req.params;
   
     // Check if the user is already part of the challenge
-    db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ?', [userId, challengeId], (err, row) => {
+    db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
       if (err) {
         console.error('Error checking existing entry:', err.message);
         return res.status(500).json({ success: false, message: 'Database query failed' });
@@ -50,8 +50,8 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
       }
   
       // Insert new entry if not already joined
-      db.run('INSERT INTO user_challenges (user_id, challenge_id, status) VALUES (?, ?, ?)',
-        [userId, challengeId, 'Active'], function(err) {
+      db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
+        [userId, challengeId, activityId, 'Active', '0'], function(err) {
           if (err) {
             console.error('Error joining challenge:', err.message);
             return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
@@ -65,11 +65,11 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
 
 // Route to fetch "My Challenges" (challenges the user has joined)
 app.get('/api/my-challenges/:userId', (req, res) => {
-    const userId = req.params;
+    const userId = req.params.userId;
 
     // SQL query to fetch the challenges that the user has joined
     const sql = `
-        SELECT uc.*
+        SELECT *
         FROM user_challenges uc
         JOIN avail_challenges ac ON uc.challenge_id = ac.challenge_id
         WHERE uc.user_id = ? `;
@@ -84,9 +84,62 @@ app.get('/api/my-challenges/:userId', (req, res) => {
     });
 });
 
+// Route to fetch activity id from the database
+app.get('/api/get-activity/:activityID', (req, res) => {
+    const activityId = req.params.activityID;
+
+    // Check if activity id is a valid number
+    if (isNaN(activityId)) {
+        return res.status(400).json({ error: 'Invalid Activity ID' });
+    }
+
+    console.log('Fetching Activity ID:', activityId);
+
+    // Query the database to fetch the activity_id from the avail_challenges table
+    db.get('SELECT * FROM avail_challenges WHERE activity_id = ?', [activityId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Database query failed' });
+            return;
+        }
+        if (row) {
+            res.json(row);
+        } else {
+            res.status(404).json({ message: 'Activity ID not found' });
+        }
+    });
+});
+
+
+// Route to fetch challenge id from the database
+app.get('/api/get-challenge/:challengeID', (req, res) => {
+    const challengeId = req.params.challengeID;
+
+    // Check if challenge ID is a valid number
+    if (isNaN(challengeId)) {
+        return res.status(400).json({ error: 'Invalid Challenge ID' });
+    }
+
+    console.log('Fetching Challenge ID:', challengeId);
+
+    // Query the database to fetch the challenge_id from the avail_challenges table
+    db.get('SELECT * FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Database query failed' });
+            return;
+        }
+        if (row) {
+            res.json(row);
+        } else {
+            res.status(404).json({ message: 'Challenge not found' });
+        }
+    });
+});
+
 // Route to fetch user id from the database
 app.get('/api/get-user/:userID', (req, res) => {
-    const userID = req.params;
+    const userID = req.params.userID;
 
     // Check if userID is a valid number
     if (isNaN(userID)) {

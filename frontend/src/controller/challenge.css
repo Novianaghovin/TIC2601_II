@@ -13,11 +13,18 @@ h1 {
   margin-bottom: 20px;
 }
 
+.challenge-header {
+  display: flex;
+  align-items: center;  /* Aligns items vertically center */
+  justify-content: space-between;  /* Puts space between the items */
+  margin-bottom: 20px;  /* Optional: Adds some space below the header */
+}
+
 /* Container to give padding and center content */
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 50px;
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

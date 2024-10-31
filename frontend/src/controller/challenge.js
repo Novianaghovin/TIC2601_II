@@ -4,31 +4,92 @@ import "./challenge.css";
 
 
 const Challenges = () => {
-  const [userId, setUserId] = useState(null); // State to store userId fetched from the backend
+  const [userId, setUserId] = useState([]); 
+  const [challengeID, setChallengeID] = useState([]);
   const [challenges, setChallenges] = useState([]); // "My Challenges"
+  const [activityID, setActivityID] = useState([]);
   const [availableChallenges, setAvailableChallenges] = useState([]); // "Available Challenges"
 
-  // Fetch both "My Challenges" and "Available Challenges" when the component mounts
   useEffect(() => {
-    fetchMyChallenges();
-    fetchAvailableChallenges();
     fetchUserId();
+    fetchAvailableChallenges();
   }, []);
+  
+  useEffect(() => {
+    if (userId) {
+      fetchMyChallenges(userId);
+    }
+  }, [userId]); 
 
-  const fetchUserId = (userID) => {
+  useEffect(() => {
+    if (challengeID) {
+      fetchChallengeID(challengeID);
+    }
+  }, [challengeID]);
+
+  useEffect(() => {
+    if (activityID) {
+      fetchActivityID(activityID);
+    }
+  }, [activityID]);
+  
+  const userID = 1;
+  
+  const fetchUserId = () => {
     fetch(`http://localhost:3001/api/get-user/${userID}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.userId) {
-          setUserId(data.userId); // Set the fetched userId in the state
-          fetchMyChallenges(data.userId); // Fetch challenges with the fetched userId
-          fetchAvailableChallenges(); // Fetch available challenges 
-        } else {
-          console.error('Error: User ID not found');
+      .then(response => { 
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
         }
+        return response.json(); 
+      })  
+      .then(data => {
+        setUserId(data.userId);
+        console.log('User ID fetched:', data.userId);
       })
       .catch(error => console.error('Error fetching user ID:', error));
   };
+  
+
+  
+  const fetchChallengeID = (challengeID) => {
+    fetch(`http://localhost:3001/api/get-challenge/${challengeID}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch Challenge ID');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          setChallengeID(data.data.challenge_id); 
+          console.log('Challenge ID fetched successfully:', data.challenge);
+        } else {
+          console.error('Challenge ID not found:', data.message);
+        }
+      })
+      .catch(error => console.error('Error fetching Challenge ID:', error));
+  };
+  
+  const fetchActivityID = (activityID) => {
+    fetch(`http://localhost:3001/api/get-activity/${activityID}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch Activity ID');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          setActivityID(data.data.activity_id); 
+          console.log('Activity ID fetched successfully:', data.activity);
+        } else {
+          console.error('Activity ID not found:', data.message);
+        }
+      })
+      .catch(error => console.error('Error fetching activity ID:', error));
+  };
+
 
   // Fetch "My Challenges" from the API
   const fetchMyChallenges = (userId) => {
@@ -53,25 +114,28 @@ const Challenges = () => {
       .catch(error => console.error('Error fetching available challenges:', error));
   };
 
-  const joinChallenge = (challengeId) => {
-    console.log('Join button clicked for challenge ID:', challengeId);
+  const joinChallenge = (activityID, challengeID) => {
+    console.log('Join button clicked for challenge ID:', challengeID);
+    console.log('Join button clicked for Activity ID:', activityID);
+
     if (!userId) {
       console.error('Error: User ID not available');
       return;
     }
-    fetch(`http://localhost:3001/api/join-challenge/${userId}/${challengeId}`, {
+    fetch(`http://localhost:3001/api/join-challenge/${userId}/${challengeID}/${activityID}`, {
       method: 'POST'
     })
       .then(response => {
         if (!response.ok) {
-          throw new Error('Failed to join the challenge');
+          return response.json().then(errData => {
+            throw new Error(errData.message || 'Failed to join the challenge');
+          });
         }
         return response.json();
       })
       .then(data => {
         if (data.success) {
           // Update available and my challenges after joining
-          fetchAvailableChallenges();
           fetchMyChallenges(userId);
           alert(`Successfully joined the challenge!`);
         } else {
@@ -93,11 +157,11 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
-            <th>Challenge Name</th>
             <th>Challenge Deadline</th>
             <th>Activity ID</th>
             <th>Participants</th>
             <th>Badge ID</th>
+            <th>Progress</th>
             <th>Status</th>
             <th>Leaderboard</th>
           </tr>
@@ -112,14 +176,14 @@ const Challenges = () => {
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
-                <td>{challenge.challenge_name}</td>
                 <td>{challenge.challenge_deadline}</td>
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
                 <td>{challenge.badge_id}</td>
+                <td>{challenge.progress}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
-                  <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.id)}>Leaderboard</button>
+                  <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.challenge_id)}>Leaderboard</button>
                 </td>
               </tr>
             ))
@@ -127,16 +191,18 @@ const Challenges = () => {
         </tbody>
       </table>
 
+      <div className = "challenge-header"></div>   
       <h1>Available Challenges</h1>
       <table>
         <thead>
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
-            <th>Challenge Name</th>
             <th>Challenge Deadline</th>
+            <th>Participants Num</th>
             <th>Activity ID</th>
             <th>Badge ID</th>
+            <th>Status</th>
             <th>Join</th>
           </tr>
         </thead>
@@ -150,12 +216,13 @@ const Challenges = () => {
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
-                <td>{challenge.challenge_name}</td>
                 <td>{challenge.challenge_deadline}</td>
+                <td>{challenge.participants_num || '0'}</td>
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.badge_id}</td>
+                <td>{challenge.status || 'Active'}</td>
                 <td>
-                  <button onClick={() => joinChallenge(challenge.challenge_id)}>Join</button>
+                <button onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}>Join</button>
                 </td>
               </tr>
             ))

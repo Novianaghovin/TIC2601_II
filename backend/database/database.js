@@ -143,8 +143,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 user_id INTEGER,
                 distance DECIMAL(5, 2) NOT NULL CHECK (distance > 0),
                 time_stamp DATETIME NOT NULL UNIQUE DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (challenge_id) REFERENCES user_challenges(user_challenge_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (user_id) REFERENCES user_challenges(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+                FOREIGN KEY (challenge_id) REFERENCES user_profile(user_id) ON DELETE CASCADE ON UPDATE CASCADE
             );
         `);
     }
