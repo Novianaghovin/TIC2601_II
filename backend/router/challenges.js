@@ -45,7 +45,6 @@ app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
         console.error('Error checking existing entry:', err.message);
         return res.status(500).json({ success: false, message: 'Database query failed' });
       }
-      
       if (row) {
         return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
       }
@@ -87,7 +86,7 @@ app.get('/api/my-challenges/:userId', (req, res) => {
 
 // Route to fetch user id from the database
 app.get('/api/get-user/:userID', (req, res) => {
-    const userID = req.params.userID;
+    const userID = req.params;
 
     // Check if userID is a valid number
     if (isNaN(userID)) {
