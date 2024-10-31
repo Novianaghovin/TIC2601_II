@@ -46,6 +46,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 activity_id INTEGER NOT NULL,
                 participants_num INTEGER NOT NULL,
                 badge_id INTEGER NOT NULL,
+                target_value INTEGER DEFAULT 100,
                 FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
                 FOREIGN KEY (badge_id) REFERENCES badge_records(badge_id) ON UPDATE CASCADE
             );

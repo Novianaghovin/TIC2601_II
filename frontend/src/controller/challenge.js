@@ -94,9 +94,40 @@ const Challenges = () => {
   // Fetch "My Challenges" from the API
   const fetchMyChallenges = (userId) => {
     fetch(`http://localhost:3001/api/my-challenges/${userId}`)
-      .then(response => response.json())
-      .then(data => setChallenges(data)) // Set the state with the challenges the user has joined
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to fetch My Challenges');
+        return response.json();
+      })
+      
+      .then(data => {
+        const joinedChallenges = data;
+
+        
+        const detailedChallenges = joinedChallenges.map(joined => {
+          const matchingChallenge = availableChallenges.find(
+            challenge => challenge.challenge_id === joined.challenge_id
+          );
+          return {
+            challenge_id: joined.challenge_id,
+            activity_id: joined.activity_id,
+            progress: joined.progress,
+            status: joined.status || 'Active', 
+            challenge_type: matchingChallenge ? matchingChallenge.challenge_type : 'N/A',
+            challenge_deadline: matchingChallenge ? matchingChallenge.challenge_deadline : 'N/A',
+            badge_id: matchingChallenge ? matchingChallenge.badge_id : 'N/A',
+            participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
+            target_value: matchingChallenge ? matchingChallenge.target_value : 0
+          };
+        });
+        setChallenges(detailedChallenges);
+      })
       .catch(error => console.error('Error fetching my challenges:', error));
+  };
+
+  const calculateProgressPercentage = (progress, targetValue) => {
+    if (!targetValue || targetValue === 0) return "0%";
+    const percentage = (progress / targetValue) * 100;
+    return `${percentage.toFixed(2)}%`; // Display with 2 decimal places
   };
 
   // Fetch "Available Challenges" from the API
@@ -180,7 +211,7 @@ const Challenges = () => {
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
                 <td>{challenge.badge_id}</td>
-                <td>{challenge.progress}</td>
+                <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
                   <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.challenge_id)}>Leaderboard</button>

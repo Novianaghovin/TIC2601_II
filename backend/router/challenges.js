@@ -71,7 +71,6 @@ app.get('/api/my-challenges/:userId', (req, res) => {
     const sql = `
         SELECT *
         FROM user_challenges uc
-        JOIN avail_challenges ac ON uc.challenge_id = ac.challenge_id
         WHERE uc.user_id = ? `;
 
     db.all(sql, [userId], (err, rows) => {
