@@ -33,7 +33,7 @@ const Challenges = () => {
     }
   }, [activityID]);
   
-  const userID = 1;
+  const userID = 1; //using Hardcoded user ID 
   
   const fetchUserId = () => {
     fetch(`http://localhost:3001/api/get-user/${userID}`)
