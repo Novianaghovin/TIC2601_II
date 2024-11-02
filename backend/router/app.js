@@ -1,6 +1,9 @@
 const express = require('express'); 
+const cors = require('cors'); 
 const app = express();
 const port = 3000;
+
+app.use(cors());
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
@@ -12,6 +15,7 @@ app.use('/activity_type', activityType);
 // Import the activity log router
 const activityLog = require('./activity_log');
 app.use('/activity_log', activityLog); // Use the activity log router
+
 
 // Import the goals router
 const goals = require('./goals');

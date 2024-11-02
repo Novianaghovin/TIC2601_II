@@ -14,19 +14,19 @@ router.get('/', (req, res) => {
     });
 });
 
-// GET a specific activity log by ID
-router.get('/:log_id', (req, res) => {
-    const logId = req.params.log_id;
-    db.get('SELECT * FROM activity_log WHERE log_id = ?', [logId], (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (row) {
-            res.status(200).json(row);
-        } else {
-            res.status(404).json({ error: 'Activity log not found.' });
-        }
-    });
+// GET all activity logs by user ID
+router.get('/user/:user_id', (req, res) => {
+  const userId = req.params.user_id;
+  db.all('SELECT * FROM activity_log WHERE user_id = ?', [userId], (err, rows) => {
+      if (err) {
+          return res.status(500).json({ error: err.message });
+      }
+      if (rows.length > 0) {
+          res.status(200).json(rows);
+      } else {
+          res.status(404).json({ error: 'No activity logs found for this user.' });
+      }
+  });
 });
 
 // Create a new activity log
@@ -82,5 +82,49 @@ router.route('/')
       });
     });
   });
+
+
+  // Update an existing activity log by ID
+router.put('/:log_id', (req, res) => {
+  const logId = req.params.log_id;
+  const { activity_duration, distance, step_count, activity_id, user_id } = req.body;
+
+  const sqlUpdate = `
+      UPDATE activity_log
+      SET activity_duration = ?, distance = ?, step_count = ?, activity_id = ?, user_id = ?
+      WHERE log_id = ?
+  `;
+
+  db.run(sqlUpdate, [activity_duration, distance, step_count, activity_id, user_id, logId], function (err) {
+      if (err) {
+          return res.status(500).json({ error: err.message });
+      }
+      if (this.changes === 0) {
+          return res.status(404).json({ error: 'Activity log not found.' });
+      }
+      res.status(200).json({ message: 'Activity log updated successfully.' });
+  });
+});
+
+// Delete an activity log by ID
+router.delete('/:log_id', (req, res) => {
+  const logId = req.params.log_id; // Get the log ID from the URL parameters
+  const sqlDelete = 'DELETE FROM activity_log WHERE log_id = ?'; // SQL query to delete the log
+
+  // Execute the delete operation
+  db.run(sqlDelete, [logId], function (err) {
+      if (err) {
+          // If there is an error during execution, return a 500 status with error details
+          return res.status(500).json({ error: err.message });
+      }
+      // Check if any rows were deleted
+      if (this.changes === 0) {
+          // If no rows were deleted, the log ID may not exist, return a 404 status
+          return res.status(404).json({ error: 'Activity log not found.' });
+      }
+      // If deletion is successful, return a success message
+      res.status(200).json({ message: 'Activity log deleted successfully.' });
+  });
+});
 
 module.exports = router;
