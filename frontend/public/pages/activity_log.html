@@ -3,27 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Log Management</title>
+    <title>My Activity</title>
     <link rel="stylesheet" href="../css/styles.css"> <!-- Add styles if necessary -->
 </head>
 <body>
-    <h1>Activity Log Management</h1>
-    <button onclick="createLog()">Create New Log</button>
-    
-    <form id="logForm">
-        <input type="text" id="activityDuration" placeholder="Activity Duration" required>
-        <input type="text" id="distance" placeholder="Distance" required>
-        <input type="text" id="userId" placeholder="User ID" required>
-        <input type="text" id="activityId" placeholder="Activity ID" required>
-        <input type="text" id="stepCount" placeholder="Step Count">
-        <button type="button" id="updateLogButton">Update</button>
+    <h1>My Activity</h1>
+
+    <form id="logForm" style="display: flex; align-items: center; gap: 10px;">
+        <label for="activityName">Activity Name:</label>
+        <select id="activityName" required>
+            <option value="run">Run</option>
+            <option value="swim">Swim</option>
+            <option value="cycle">Cycle</option>
+            <option value="walk">Walk</option>
+        </select>
+        <input type="number" id="activityDuration" placeholder="Activity Duration (minutes)" required>
+        <input type="number" id="distance" placeholder="Distance (km)" step="0.01" required>
+        <input type="number" id="stepCount" placeholder="Step Count" min="0" required>
+        <input type="number" id="userId" placeholder="User ID" required>
+        <button type="button" onclick="createLog()">Record My Activity</button>
     </form>
 
-    <div id="logContainer">
-        <!-- Dynamic content will be injected here -->
-    </div>
+    <table id="logTable" border="1">
+        <thead>
+            <tr>
+                <th>Activity Name</th>
+                <th>Duration (minutes)</th>
+                <th>Distance (km)</th>
+                <th>Step Count</th>
+                <th>Calories Burnt</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody id="logTableBody">
+            <!-- Dynamic content will be injected here -->
+        </tbody>
+    </table>
 
     <!-- Link to external JavaScript file -->
-    <script src="../../../backend/router/activity.js"></script>
+    <script>
+        const apiUrl = 'http://localhost:3000/activity_log'; // Update with your backend URL
+
+        // Function to fetch all activity logs by user ID
+        async function fetchActivityLogs(userId) {
+            const response = await fetch(`${apiUrl}/user/${userId}`);
+            const data = await response.json();
+            const logTableBody = document.getElementById('logTableBody');
+            logTableBody.innerHTML = ''; // Clear existing logs
+
+            if (response.ok) {
+                data.forEach(log => {
+                    const row = `
+                        <tr>
+                            <td>${log.activity_name}</td>
+                            <td>${log.activity_duration}</td>
+                            <td>${log.distance}</td>
+                            <td>${log.step_count}</td>
+                            <td>${log.calories_burnt}</td>
+                            <td>${log.timestamp}</td>
+                        </tr>
+                    `;
+                    logTableBody.innerHTML += row;
+                });
+            } else {
+                logTableBody.innerHTML = `<tr><td colspan="6">${data.error}</td></tr>`;
+            }
+        }
+
+        // Function to create a new activity log
+        async function createLog() {
+            const activityName = document.getElementById('activityName').value;
+            const activityDuration = document.getElementById('activityDuration').value;
+            const distance = document.getElementById('distance').value;
+            const stepCount = document.getElementById('stepCount').value;
+            const userId = document.getElementById('userId').value;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ activity_name: activityName, activity_duration: activityDuration, distance, step_count: stepCount, user_id: userId })
+            });
+
+            if (response.ok) {
+                alert('Activity log created successfully!');
+                fetchActivityLogs(userId);
+            } else {
+                alert('Error creating activity log');
+            }
+        }
+
+        // Call fetchActivityLogs with a sample user ID when the page loads
+        window.onload = () => fetchActivityLogs(1); // Replace with actual user ID as needed
+    </script>
 </body>
 </html>
