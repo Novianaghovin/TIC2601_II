@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Log Management</title>
+    <link rel="stylesheet" href="../css/styles.css"> <!-- Add styles if necessary -->
+</head>
+<body>
+    <h1>Activity Log Management</h1>
+    <button onclick="createLog()">Create New Log</button>
+    
+    <form id="logForm">
+        <input type="text" id="activityDuration" placeholder="Activity Duration" required>
+        <input type="text" id="distance" placeholder="Distance" required>
+        <input type="text" id="userId" placeholder="User ID" required>
+        <input type="text" id="activityId" placeholder="Activity ID" required>
+        <input type="text" id="stepCount" placeholder="Step Count">
+        <button type="button" id="updateLogButton">Update</button>
+    </form>
+
+    <div id="logContainer">
+        <!-- Dynamic content will be injected here -->
+    </div>
+
+    <!-- Link to external JavaScript file -->
+    <script src="../../../backend/router/activity.js"></script>
+</body>
+</html>

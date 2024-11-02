@@ -82,7 +82,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             distance DECIMAL(5, 2) NOT NULL CHECK(distance > 0),
             step_count INTEGER NOT NULL DEFAULT 0 CHECK(step_count >= 0),
             calories_burnt DECIMAL(5, 2),
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            timestamp DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+8 hours')),
             activity_id INTEGER,
             user_id INTEGER NOT NULL,
             FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
