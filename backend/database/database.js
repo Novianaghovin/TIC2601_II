@@ -91,7 +91,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
                 ON DELETE CASCADE 
                 ON UPDATE CASCADE
-            );
+        );
         `);
         
         // Create goals table
@@ -100,9 +100,10 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 goal_name TEXT NOT NULL,
                 goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
-                progress DECIMAL(5, 2),
+                target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0), -- Column for target distance
+                progress DECIMAL(5, 2) DEFAULT 0,  -- Default progress starts at 0
                 user_id INTEGER NOT NULL,
-                activity_id INTEGER,
+                activity_id INTEGER, 
                 FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
                     ON DELETE CASCADE 
                     ON UPDATE CASCADE,

@@ -226,6 +226,10 @@ INSERT INTO activity_log (activity_duration, distance, step_count, calories_burn
 (60, 1.00, 0, 350.00, 2, 1),  -- Swimming for 60 mins
 (45, 15.00, 0, 450.00, 3, 1), -- Cycling for 45 mins
 (30, 2.00, 3000, 150.00, 4, 1);  -- Walking for 30 mins
+(25, 4.50, 3500, 280.00, 1, 2),  -- Running for 25 mins
+(70, 1.50, 0, 400.00, 2, 2),  -- Swimming for 70 mins
+(50, 12.00, 0, 420.00, 3, 2), -- Cycling for 50 mins
+(40, 3.50, 4500, 180.00, 4, 2);  -- Walking for 40 mins
 
 INSERT INTO badge_records (user_id, challenge_id, badge_name, achieved_date) VALUES
 (1, NULL, 'Oct 2024 5km Run Challenge', '2024-01-01'),
@@ -247,11 +251,15 @@ INSERT INTO badge_records (user_id, challenge_id, badge_name, achieved_date) VAL
 (2, 2, 'Nov 2024 5km Run Challenge', '2023-11-30'),
 (3, 3, 'Dec 2024 5km Run Challenge ', '2023-12-31');
 
-INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VALUES 
-('Run 5 km', '2025-03-31', 0.00, 1, 1),
-('Swim 2 km', '2025-02-28', 0.00, 1, 2),
-('Cycle 50 km', '2025-01-31', 0.00, 1, 3),
-('Walk 10,000 steps', '2025-01-15', 0.00, 1, 4);
+INSERT INTO goals (goal_name, goal_deadline, target_distance, progress, user_id, activity_id) VALUES 
+('Run 5 km', '2024-11-30', 5.00, 0, 1, 1), -- Goal for running 5 km by user 1
+('Swim 2 km', '2024-11-30', 2.00, 0, 1, 2), -- Goal for swimming 2 km by user 1
+('Cycle 50 km', '2024-11-30', 50.00, 0, 1, 3), -- Goal for cycling 50 km by user 1
+('Walk 3 km', '2024-11-30', 3.00, 0, 1, 4), -- Goal for walking 3 km by user 1
+('Run 6 km', '2024-12-15', 6.00, 0, 2, 1), -- Goal for running 6 km by user 2
+('Swim 3 km', '2024-12-05', 3.00, 0, 2, 2), -- Goal for swimming 3 km by user 2
+('Cycle 40 km', '2024-12-10', 40.00, 0, 2, 3), -- Goal for cycling 40 km by user 2
+('Walk 5 km', '2024-12-20', 5.00, 0, 2, 4); -- Goal for walking 5 km by user 2
 
 INSERT INTO leaderboard (rank, challenge_id, user_id, distance, time, achieved_date) VALUES
 (1, 1, 1, 5.00, 25.00, '2024-01-01'),
