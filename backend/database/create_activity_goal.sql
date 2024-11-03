@@ -25,16 +25,32 @@ CREATE TABLE goals (
     goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     goal_name TEXT NOT NULL,
     goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
-    progress DECIMAL(5, 2),
+    target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0), -- Added column for target distance
+    progress DECIMAL(5, 2) DEFAULT 0,  -- Default progress starts at 0
     user_id INTEGER NOT NULL,
-    activity_id INTEGER,
-    FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
+    activity_id INTEGER, -- This now references activity_log for better data association
+    FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) 
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
         ON DELETE CASCADE 
         ON UPDATE CASCADE
 );
+
+-- Trigger to update progress in the goals table
+CREATE TRIGGER update_goal_progress
+AFTER INSERT ON activity_log
+BEGIN
+    UPDATE goals
+    SET progress = MIN(100, (
+        SELECT SUM(al.distance) * 100.0 / g.target_distance
+        FROM activity_log al
+        WHERE al.user_id = NEW.user_id AND al.activity_id = g.activity_id
+    ))
+    FROM goals g
+    WHERE g.user_id = NEW.user_id AND g.activity_id = NEW.activity_id;
+END;
+
 
 --insert sample data
 INSERT INTO activity_type (activity_name, activity_multiplier) VALUES 
@@ -49,8 +65,8 @@ INSERT INTO activity_log (activity_duration, distance, step_count, calories_burn
 (45, 15.00, 0, 450.00, 3, 1), -- Cycling for 45 mins
 (30, 2.00, 3000, 150.00, 4, 1);  -- Walking for 30 mins
 
-INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VALUES 
-('Run 5 km', '2025-03-31', 0.00, 1, 1),
-('Swim 2 km', '2025-02-28', 0.00, 1, 2),
-('Cycle 50 km', '2025-01-31', 0.00, 1, 3),
-('Walk 10,000 steps', '2025-01-15', 0.00, 1, 4);
+INSERT INTO goals (goal_name, goal_deadline, target_distance, progress, user_id, activity_id) VALUES 
+('Run 5 km', '2024-11-30', 5.00, 0, 1, 1), -- Goal for running 5 km by user 1
+('Walk 3 km', '2024-11-30', 3.00, 0, 1, 2), -- Goal for walking 3 km by user 1
+('Cycle 50 km', '2024-11-30', 50.00, 0, 1, 3), -- Goal for cycling 50 km by user 1
+('Swim 2 km', '2024-11-30', 2.00, 0, 1, 4); -- Goal for swimming 2 km by user 1
