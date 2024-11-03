@@ -10,8 +10,9 @@
     <h1>My Activity</h1>
 
     <form id="logForm" style="display: flex; align-items: center; gap: 10px;">
-        <label for="activityName">Activity Name:</label>
-        <select id="activityName" required>
+        <label for="activityType">Activity Type:</label>
+        <select id="activityType" required>
+            <option value="" disabled selected>Select Activity Type</option>
             <option value="run">Run</option>
             <option value="swim">Swim</option>
             <option value="cycle">Cycle</option>
@@ -21,13 +22,13 @@
         <input type="number" id="distance" placeholder="Distance (km)" step="0.01" required>
         <input type="number" id="stepCount" placeholder="Step Count" min="0" required>
         <input type="number" id="userId" placeholder="User ID" required>
-        <button type="button" onclick="createLog()">Record My Activity</button>
+        <button type="button" onclick="createLog()">Record Activity</button>
     </form>
 
     <table id="logTable" border="1">
         <thead>
             <tr>
-                <th>Activity Name</th>
+                <th>Activity Type</th>
                 <th>Duration (minutes)</th>
                 <th>Distance (km)</th>
                 <th>Step Count</th>
@@ -40,7 +41,6 @@
         </tbody>
     </table>
 
-    <!-- Link to external JavaScript file -->
     <script>
         const apiUrl = 'http://localhost:3000/activity_log'; // Update with your backend URL
 
@@ -72,7 +72,7 @@
 
         // Function to create a new activity log
         async function createLog() {
-            const activityName = document.getElementById('activityName').value;
+            const activityType = document.getElementById('activityType').value;
             const activityDuration = document.getElementById('activityDuration').value;
             const distance = document.getElementById('distance').value;
             const stepCount = document.getElementById('stepCount').value;
@@ -81,7 +81,7 @@
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ activity_name: activityName, activity_duration: activityDuration, distance, step_count: stepCount, user_id: userId })
+                body: JSON.stringify({ activity_name: activityType, activity_duration: activityDuration, distance, step_count: stepCount, user_id: userId })
             });
 
             if (response.ok) {
