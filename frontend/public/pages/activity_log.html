@@ -44,6 +44,21 @@
     <script>
         const apiUrl = 'http://localhost:3000/activity_log'; // Update with your backend URL
 
+        // Function to format the date and time
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const isPM = hours >= 12;
+            const formattedHours = isPM ? (hours % 12 || 12) : (hours || 12);
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            const period = isPM ? 'pm' : 'am';
+
+            const formattedDate = `${formattedHours}:${formattedMinutes} ${period} ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+
+            return formattedDate;
+        }
+
         // Function to fetch all activity logs by user ID
         async function fetchActivityLogs(userId) {
             const response = await fetch(`${apiUrl}/user/${userId}`);
@@ -53,6 +68,7 @@
 
             if (response.ok) {
                 data.forEach(log => {
+                    const formattedTimestamp = formatDateTime(log.timestamp);
                     const row = `
                         <tr>
                             <td>${log.activity_name}</td>
@@ -60,7 +76,7 @@
                             <td>${log.distance}</td>
                             <td>${log.step_count}</td>
                             <td>${log.calories_burnt}</td>
-                            <td>${log.timestamp}</td>
+                            <td>${formattedTimestamp}</td>
                         </tr>
                     `;
                     logTableBody.innerHTML += row;

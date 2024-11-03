@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> <!-- Ensure the page language is set to English -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Goals</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Include Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <h1>My Goals</h1>
@@ -12,7 +16,8 @@
     <!-- Form for creating/updating goals -->
     <form id="goalForm" style="display: flex; align-items: center; gap: 10px;">
         <input type="text" id="goalName" placeholder="Goal Name" required>
-        <input type="date" id="goalDeadline" required>
+        <!-- Replace date input with Flatpickr-supported input -->
+        <input type="text" id="goalDeadline" placeholder="Select Deadline" required>
         <input type="number" id="targetDistance" placeholder="Target Distance (km)" step="0.01" required>
         <select id="activityId" required>
             <option value="" disabled selected>Select Activity Type</option>
@@ -45,6 +50,16 @@
     <script>
         const apiUrl = 'http://localhost:3000/goals'; // Update with your backend URL
         let editingGoalId = null; // Track the goal being edited
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Flatpickr for the goal deadline input
+            flatpickr("#goalDeadline", {
+                dateFormat: "Y-m-d", // Customize the format as needed
+                locale: "en" // Set the locale to English
+            });
+
+            fetchGoals(1); // Replace with actual user ID as needed
+        });
 
         async function fetchGoals(userId) {
             const response = await fetch(`${apiUrl}?user_id=${userId}`);
@@ -150,8 +165,6 @@
                 alert('Error deleting goal');
             }
         }
-
-        window.onload = () => fetchGoals(1); // Replace with actual user ID as needed
     </script>
 </body>
 </html>
