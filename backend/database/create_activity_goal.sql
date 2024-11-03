@@ -21,14 +21,13 @@ CREATE TABLE activity_log (
         ON UPDATE CASCADE
 );
 
-DROP TABLE IF EXISTS goals;
-
 CREATE TABLE goals (
     goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     goal_name TEXT NOT NULL,
     goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
     target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0), -- Column for target distance
     progress DECIMAL(5, 2) DEFAULT 0,  -- Default progress starts at 0
+    created_date DATE DEFAULT CURRENT_DATE,
     user_id INTEGER NOT NULL,
     activity_id INTEGER, 
     FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
@@ -49,6 +48,8 @@ BEGIN
         FROM activity_log al
         WHERE al.user_id = NEW.user_id 
           AND al.activity_id = NEW.activity_id
+          AND al.timestamp >= NEW.created_date
+          AND al.timestamp <= NEW.goal_deadline
     )
     WHERE goal_id = NEW.goal_id;
 END;
@@ -63,6 +64,8 @@ BEGIN
         FROM activity_log al
         WHERE al.user_id = NEW.user_id 
           AND al.activity_id = NEW.activity_id
+          AND al.timestamp >= NEW.created_date
+          AND al.timestamp <= NEW.goal_deadline
     )
     WHERE goal_id = NEW.goal_id;
 END;
@@ -77,8 +80,9 @@ BEGIN
         FROM activity_log al
         WHERE al.user_id = g.user_id 
           AND al.activity_id = g.activity_id
+          AND al.timestamp >= g.created_date
+          AND al.timestamp <= g.goal_deadline
     )
-    FROM goals g
     WHERE g.user_id = NEW.user_id 
       AND g.activity_id = NEW.activity_id;
 END;
