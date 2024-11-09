@@ -5,6 +5,10 @@ CREATE TABLE  avail_challenges (
 	participants_num INTEGER NOT NULL,
 	status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Expired')),
 	badge_id INTEGER NOT NULL,
+	activity_id INTEGER NOT NULL,
+	distance INTERGER CHECK(distance IN ('5', '10' ,'21', '42')),
+        target_value INTEGER DEFAULT 100,
+	FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
 	FOREIGN KEY (badge_id) REFERENCES badge_type(badge_id) ON UPDATE CASCADE
 );
 
@@ -13,9 +17,12 @@ CREATE TABLE user_challenges (
     user_challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     challenge_id INTEGER NOT NULL,
+    activity_id INTEGER NOT NULL,	
     status VARCHAR(10) NOT NULL CHECK (status IN ('active', 'completed', 'expired')),
+    progress DECIMAL (5,2),
     FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON UPDATE CASCADE,
     FOREIGN KEY (challenge_id) REFERENCES avail_challenges(challenge_id) ON UPDATE CASCADE
+    FOREIGN KEY (activity_id) REFERENCES activity_log(log_id)
 );
 
 -- Insert data into the avail_challenges table
