@@ -222,30 +222,25 @@ INSERT INTO activity_type (activity_name, activity_multiplier) VALUES
 ('Walk', 3.80);   -- MET value for walking
 
 INSERT INTO activity_log (activity_duration, distance, step_count, calories_burnt, activity_id, user_id) VALUES 
-(30, 5.00, 4000, 300.00, 1, 1),  -- Running for 30 mins
-(60, 1.00, 0, 350.00, 2, 1),  -- Swimming for 60 mins
-(45, 15.00, 0, 450.00, 3, 1), -- Cycling for 45 mins
-(30, 2.00, 3000, 150.00, 4, 1);  -- Walking for 30 mins
+(30, 5.00, 4000, 300.00, 1, 1),  
+(60, 5.00, 0, 350.00, 2, 1), 
+(45, 1.00, 0, 450.00, 3, 1), 
+(30, 2.00, 3000, 150.00, 4, 1); 
 
 INSERT INTO badge_type (badge_id, badge_name) VALUES
 (1, 'Oct 2024 5km Run Challenge'),
 (2, 'Nov 2024 5km Run Challenge'),
-(3, 'Dec 2024 5km Run Challenge');
+(3, 'Dec 2024 5km Run Challenge ');
 
-INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status, badge_id) VALUES
-('Running', '2023-10-31', 1, 50,'Active', 1),
-('Running', '2023-11-31', 2, 50,'Active', 2),
-('Running', '2023-12-31', 3, 50,'Active', 3);
+INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status , badge_id, distance) VALUES
+('Running',  '2023-10-31', 1, 50, 'Active', 1, 5),
+('Running',  '2023-11-31', 2, 50, 'Active', 2, 5),
+('Running',  '2023-12-31', 3, 50, 'Active', 3, 5);
 
-INSERT INTO leaderboard (rank, challenge_id, user_id, distance, time_stamp) VALUES
-(1, 1, 1, 5.00, '2024-10-31 14:30:00'),
-(2, 2, 2, 20.00, '2024-11-30 14:30:00'),
-(3, 3, 3, 10.00, '2024-12-31 14:30:00');
-
-INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES
-(1, 1, 1, 'Active', 0),
-(2, 2, 2, 'Active', 0),
-(3, 3, 3, 'Active', 0);
+INSERT INTO user_challenges (user_id, challenge_id,activity_id, status, progress) VALUES
+(1, 1, 1, 'Active', 0.00),
+(2, 2, 2, 'Active', 0.00),
+(3, 3, 3, 'Active', 0.00);
 
 INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VALUES 
 ('Run 5 km', '2025-03-31', 0.00, 1, 1),
@@ -253,4 +248,7 @@ INSERT INTO goals (goal_name, goal_deadline, progress, user_id, activity_id) VAL
 ('Cycle 50 km', '2025-01-31', 0.00, 1, 3),
 ('Walk 10,000 steps', '2025-01-15', 0.00, 1, 4);
 
-
+INSERT INTO leaderboard (rank, challenge_id, user_id, distance, time_stamp) VALUES
+(1, 1, 1, 5, '2024-01-01 14:30'),
+(2, 2, 2, 10, '2024-01-02 14:30'),
+(3, 3, 3, 21, '2024-01-03 14:30');

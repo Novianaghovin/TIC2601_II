@@ -32,6 +32,7 @@ const Challenges = () => {
       fetchActivityID(activityID);
     }
   }, [activityID]);
+
   
   const userID = 1; //using Hardcoded user ID 
   
@@ -50,8 +51,8 @@ const Challenges = () => {
       .catch(error => console.error('Error fetching user ID:', error));
   };
   
-
   
+
   const fetchChallengeID = (challengeID) => {
     fetch(`http://localhost:3001/api/get-challenge/${challengeID}`)
       .then(response => {
@@ -110,12 +111,12 @@ const Challenges = () => {
           return {
             challenge_id: joined.challenge_id,
             activity_id: joined.activity_id,
+            participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
             progress: joined.progress,
             status: joined.status || 'Active', 
             challenge_type: matchingChallenge ? matchingChallenge.challenge_type : 'N/A',
             challenge_deadline: matchingChallenge ? matchingChallenge.challenge_deadline : 'N/A',
             badge_id: matchingChallenge ? matchingChallenge.badge_id : 'N/A',
-            participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
             target_value: matchingChallenge ? matchingChallenge.target_value : 0
           };
         });
@@ -126,9 +127,9 @@ const Challenges = () => {
 
   const calculateProgressPercentage = (progress, targetValue) => {
     if (!targetValue || targetValue === 0) return "0%";
-    const percentage = (progress / targetValue) * 100;
+    const percentage = Math.min((progress / targetValue) * 100, 100); // Cap at 100%
     return `${percentage.toFixed(2)}%`; // Display with 2 decimal places
-  };
+};
 
   // Fetch "Available Challenges" from the API
   const fetchAvailableChallenges = () => {
@@ -175,14 +176,38 @@ const Challenges = () => {
       })
       .catch(error => console.error('Error joining challenge:', error));
   };
-  
 
+  const refreshProgress = () => {
+    fetch(`http://localhost:3001/api/refresh-progress/${userId}`, { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Progress has been updated!');
+          fetchMyChallenges(userId); // Refresh "My Challenges" data
+        } else {
+          alert('Failed to refresh progress.');
+        }
+      })
+      .catch(error => {
+        console.error('Error refreshing progress:', error);
+        alert('An error occurred while refreshing progress.');
+      });
+  };
+  
+  
+  
   return (
     <div className="Challenges">
     <NavBar />
 
     <div className="container">
       <h1>My Challenges</h1>
+      <button onClick={refreshProgress}>Refresh Progress</button> 
       <table>
         <thead>
           <tr>
@@ -229,6 +254,7 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
+            <th>Distance</th>
             <th>Challenge Deadline</th>
             <th>Participants Num</th>
             <th>Activity ID</th>
@@ -247,6 +273,7 @@ const Challenges = () => {
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
+                <td>{challenge.distance}</td>
                 <td>{challenge.challenge_deadline}</td>
                 <td>{challenge.participants_num || '0'}</td>
                 <td>{challenge.activity_id}</td>

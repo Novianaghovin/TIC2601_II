@@ -83,6 +83,62 @@ app.get('/api/my-challenges/:userId', (req, res) => {
     });
 });
 
+// Route to refresh progress for all user challenges
+app.post('/api/refresh-progress/:userId', (req, res) => {
+    const userId = req.params.userId; 
+
+    // Fetch all challenges for the user along with their distances
+    const fetchChallengesQuery = `
+    SELECT uc.challenge_id, uc.user_id, ac.distance
+    FROM user_challenges AS uc
+    JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
+    WHERE uc.user_id = ?`;
+
+    db.all(fetchChallengesQuery, [userId], (err, challenges) => {
+        if (err) {
+            console.error('Error fetching user challenges:', err.message);
+            return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
+        }
+
+        // Iterate over each challenge and calculate progress
+        challenges.forEach(challenge => {   
+            const { user_id, distance, challenge_id} = challenge;
+
+            // Calculate total distance for this challenge
+            const totalDistanceQuery = `SELECT SUM(distance) AS totalDistance FROM activity_log WHERE user_id = ?`;
+
+            db.get(totalDistanceQuery, [user_id], (err, row) => {
+                if (err) {
+                    console.error('Error calculating total distance:', err.message);
+                    return;
+                }
+
+                const totalDistance = row.totalDistance || 0;
+
+                // Calculate progress percentage
+                let progress = (totalDistance / distance) * 100;
+                if (progress >= 100) {
+                    progress = 100; // Cap progress at 100%
+                }
+                const status = progress >= 100 ? 'Completed' : 'Active';
+
+                // Update the user's progress and status in the user_challenges table
+                db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
+                    [progress, status, user_id, challenge_id], function(err) {
+                    if (err) {
+                        console.error('Error updating progress:', err.message);
+                    }
+                });
+            });
+        });
+    });
+
+    // Send a response back once all updates are complete
+    res.json({ success: true, message: 'Progress has been updated for all challenges.' });
+});
+
+
+
 // Route to fetch activity id from the database
 app.get('/api/get-activity/:activityID', (req, res) => {
     const activityId = req.params.activityID;
