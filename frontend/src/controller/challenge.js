@@ -111,6 +111,7 @@ const Challenges = () => {
           return {
             challenge_id: joined.challenge_id,
             activity_id: joined.activity_id,
+            distance: matchingChallenge ? matchingChallenge.distance : 'N/A',
             participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
             progress: joined.progress,
             status: joined.status || 'Active', 
@@ -213,6 +214,7 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
+            <th>Distance(km)</th>
             <th>Challenge Deadline</th>
             <th>Activity ID</th>
             <th>Participants</th>
@@ -232,6 +234,7 @@ const Challenges = () => {
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
+                <td>{challenge.distance}</td>
                 <td>{challenge.challenge_deadline}</td>
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
@@ -254,7 +257,7 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
-            <th>Distance</th>
+            <th>Distance(km)</th>
             <th>Challenge Deadline</th>
             <th>Participants Num</th>
             <th>Activity ID</th>
@@ -266,7 +269,7 @@ const Challenges = () => {
         <tbody>
           {availableChallenges.length === 0 ? (
             <tr>
-              <td colSpan="7">No challenges available.</td>
+              <td colSpan="8">No challenges available.</td>
             </tr>
           ) : (
             availableChallenges.map(challenge => (
