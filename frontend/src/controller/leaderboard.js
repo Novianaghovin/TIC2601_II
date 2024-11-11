@@ -4,43 +4,17 @@ import NavBar from './components/NavBar';
 import './leaderboard.css';
 
 const Leaderboard = () => {
-  const { challengeId } = useParams(); // Get challenge_id from URL parameters
+  const { challengeID } = useParams(); // Get challenge_id from URL parameters
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [challengeID, setChallengeID] = useState([]);
 
-
-  useEffect(() => {
-    if (challengeId) {
-      fetchLeaderboardData(challengeId);
-    }
-  }, [challengeId]);
 
   useEffect(() => {
     if (challengeID) {
-      fetchChallengeID(challengeID);
+      fetchLeaderboardData(challengeID);
     }
   }, [challengeID]);
-
-  const fetchChallengeID = (challengeID) => {
-    fetch(`http://localhost:3001/api/get-challenge/${challengeID}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch Challenge ID');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          setChallengeID(data.data.challenge_id); 
-          console.log('Challenge ID fetched successfully:', data.challenge);
-        } else {
-          console.error('Challenge ID not found:', data.message);
-        }
-      })
-      .catch(error => console.error('Error fetching Challenge ID:', error));
-  };
 
   const fetchLeaderboardData = (challengeID) => {
     setLoading(true); // Set loading state to true at the start of data fetch
@@ -54,7 +28,7 @@ const Leaderboard = () => {
       .then(data => {
         if (data.success) {
           setLeaderboardData(data); 
-          console.log('Leaderboard data fetched successfully:', data.data);
+          console.log('Leaderboard data fetched successfully:', data);
         } else {
           console.error('Leaderboard data not found:', data.message);
           setErrorMessage(data.message || "No data available for this challenge.");
@@ -75,7 +49,7 @@ const Leaderboard = () => {
 
       <div className="leaderboard-container">
         <h1>Leaderboard for Challenge</h1>
-        <p>Challenge ID: {challengeId}</p>
+        <p>Challenge ID: {challengeID}</p>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
 
         {loading ? (

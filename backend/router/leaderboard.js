@@ -21,34 +21,9 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-// Route to fetch challenge id from the database
-app.get('/api/get-challenge/:challengeID', (req, res) => {
-    const challengeId = req.params.challengeID;
 
-    // Check if challenge ID is a valid number
-    if (isNaN(challengeId)) {
-        return res.status(400).json({ error: 'Invalid Challenge ID' });
-    }
-
-    console.log('Fetching Challenge ID:', challengeId);
-
-    // Query the database to fetch the challenge_id from the avail_challenges table
-    db.get('SELECT * FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, row) => {
-        if (err) {
-            console.error('Database error:', err);
-            res.status(500).json({ error: 'Database query failed' });
-            return;
-        }
-        if (row) {
-            res.json(row);
-        } else {
-            res.status(404).json({ message: 'Challenge not found' });
-        }
-    });
-});
-
-app.get('/api/leaderboard/:challengeId', (req, res) => {
-    const challengeId = req.params.challengeId;
+app.get('/api/leaderboard/:challengeID', (req, res) => {
+    const challengeID = req.params.challengeID;
 
     // SQL query to fetch the leaderboard of the specific challenge ID
     const sql = `
@@ -57,7 +32,7 @@ app.get('/api/leaderboard/:challengeId', (req, res) => {
         WHERE ld.challenge_id = ? 
         ORDER BY time_stamp ASC`;   // Ranking by earliest timestamp as the top rank
 
-    db.all(sql, [challengeId], (err, rows) => {
+    db.all(sql, [challengeID], (err, rows) => {
         if (err) {
             console.error('Error fetching leaderboard data:', err.message);
             res.status(500).json({ error: err.message });
