@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import NavBar from './components/NavBar';
+import { useNavigate } from 'react-router-dom';
 import "./challenge.css";
 
 
@@ -9,6 +10,8 @@ const Challenges = () => {
   const [challenges, setChallenges] = useState([]); // "My Challenges"
   const [activityID, setActivityID] = useState([]);
   const [availableChallenges, setAvailableChallenges] = useState([]); // "Available Challenges"
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserId();
@@ -134,7 +137,7 @@ const Challenges = () => {
 
   // Fetch "Available Challenges" from the API
   const fetchAvailableChallenges = () => {
-    fetch('http://localhost:3001/api/available-challenges') // Update with your real API endpoint
+    fetch('http://localhost:3001/api/available-challenges') 
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch Available Challenges');
@@ -199,6 +202,11 @@ const Challenges = () => {
         alert('An error occurred while refreshing progress.');
       });
   };
+
+  const handleViewLeaderboard = (challengeId) => {
+    // Navigate to the leaderboard page with the specific challenge ID
+    navigate(`/leaderboard/${challengeId}`);
+  };
   
   
   
@@ -242,7 +250,8 @@ const Challenges = () => {
                 <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
-                  <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.challenge_id)}>Leaderboard</button>
+                  {/* Use handleViewLeaderboard to navigate to the leaderboard */}
+                    <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>View Leaderboard</button>
                 </td>
               </tr>
             ))
