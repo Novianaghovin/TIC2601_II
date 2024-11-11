@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import NavBar from './components/NavBar';
+import { useNavigate } from 'react-router-dom';
 import "./challenge.css";
 
 
@@ -9,6 +10,8 @@ const Challenges = () => {
   const [challenges, setChallenges] = useState([]); // "My Challenges"
   const [activityID, setActivityID] = useState([]);
   const [availableChallenges, setAvailableChallenges] = useState([]); // "Available Challenges"
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserId();
@@ -111,6 +114,7 @@ const Challenges = () => {
           return {
             challenge_id: joined.challenge_id,
             activity_id: joined.activity_id,
+            distance: matchingChallenge ? matchingChallenge.distance : 'N/A',
             participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
             progress: joined.progress,
             status: joined.status || 'Active', 
@@ -133,7 +137,7 @@ const Challenges = () => {
 
   // Fetch "Available Challenges" from the API
   const fetchAvailableChallenges = () => {
-    fetch('http://localhost:3001/api/available-challenges') // Update with your real API endpoint
+    fetch('http://localhost:3001/api/available-challenges') 
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch Available Challenges');
@@ -198,6 +202,11 @@ const Challenges = () => {
         alert('An error occurred while refreshing progress.');
       });
   };
+
+  const handleViewLeaderboard = (challengeId) => {
+    // Navigate to the leaderboard page with the specific challenge ID
+    navigate(`/leaderboard/${challengeId}`);
+  };
   
   
   
@@ -213,6 +222,7 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
+            <th>Distance(km)</th>
             <th>Challenge Deadline</th>
             <th>Activity ID</th>
             <th>Participants</th>
@@ -232,6 +242,7 @@ const Challenges = () => {
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
+                <td>{challenge.distance}</td>
                 <td>{challenge.challenge_deadline}</td>
                 <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
@@ -239,7 +250,8 @@ const Challenges = () => {
                 <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
-                  <button onClick={() => alert('Viewing Leaderboard for Challenge ' + challenge.challenge_id)}>Leaderboard</button>
+                  {/* Use handleViewLeaderboard to navigate to the leaderboard */}
+                    <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>View Leaderboard</button>
                 </td>
               </tr>
             ))
@@ -254,7 +266,7 @@ const Challenges = () => {
           <tr>
             <th>Challenge ID</th>
             <th>Challenge Type</th>
-            <th>Distance</th>
+            <th>Distance(km)</th>
             <th>Challenge Deadline</th>
             <th>Participants Num</th>
             <th>Activity ID</th>
@@ -266,7 +278,7 @@ const Challenges = () => {
         <tbody>
           {availableChallenges.length === 0 ? (
             <tr>
-              <td colSpan="7">No challenges available.</td>
+              <td colSpan="8">No challenges available.</td>
             </tr>
           ) : (
             availableChallenges.map(challenge => (

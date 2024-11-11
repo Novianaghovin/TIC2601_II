@@ -2,7 +2,6 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
-
 const app = express();
 const port = 3001;
 
@@ -41,26 +40,35 @@ app.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
   
     // Check if the user is already part of the challenge
     db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
-      if (err) {
-        console.error('Error checking existing entry:', err.message);
-        return res.status(500).json({ success: false, message: 'Database query failed' });
-      }
-      if (row) {
-        return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
-      }
+        if (err) {
+            console.error('Error checking existing entry:', err.message);
+            return res.status(500).json({ success: false, message: 'Database query failed' });
+        }
+        if (row) {
+            return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
+        }
   
-      // Insert new entry if not already joined
-      db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
-        [userId, challengeId, activityId, 'Active', '0'], function(err) {
-          if (err) {
-            console.error('Error joining challenge:', err.message);
-            return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
-          }
-  
-          res.json({ success: true, message: 'Successfully joined the challenge!' });
-        });
+        // Insert new entry if not already joined
+        db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
+            [userId, challengeId, activityId, 'Active', '0'], function(err) {
+                if (err) {
+                    console.error('Error joining challenge:', err.message);
+                    return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
+                }
+
+                // Increment participants count in the avail_challenges table
+                db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function(err) {
+                    if (err) {
+                        console.error('Error updating participants count:', err.message);
+                        return res.status(500).json({ success: false, message: 'Failed to update participants count.' });
+                    }
+                    res.json({ success: true, message: 'Successfully joined the challenge!' });
+                });
+            }
+        );
     });
-  });
+});
+
   
 
 // Route to fetch "My Challenges" (challenges the user has joined)
