@@ -1,58 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// App.js  -- function from controller can be all added here to run before ssplitting to neww page
+import React, { useState } from 'react';
+
 import Badge from './controller/badge.js';
 
-const App = ({ user_id }) => {
-    // State to store achievements for current and previous months
-    const [currentMonthAchievements, setCurrentMonthAchievements] = useState([]);
-    const [previousMonthAchievements, setPreviousMonthAchievements] = useState([]);
+const App = () => {
+    // State to manage badges for current and previous months will be automatically input when database have been established
+    const [currentMonthAchievements] = useState([
+        { badgeName: '5km running', achieved: true, dateAchieved: '2024-10-01' },
+        { badgeName: '10km running', achieved: true, dateAchieved: '2024-10-05' },
+        { badgeName: '21km running', achieved: false, dateAchieved: null },
+        { badgeName: '10k steps walking', achieved: true, dateAchieved: '2024-10-10' },
+        { badgeName: '20k steps walking', achieved: false, dateAchieved: null },
+        { badgeName: '30k steps walking', achieved: true, dateAchieved: '2024-10-15' },
+    ]);
+
+    const [previousMonthAchievements] = useState([
+        { badgeName: '5km running', achieved: false, dateAchieved: null },
+        { badgeName: '10km running', achieved: true, dateAchieved: '2024-09-25' },
+        { badgeName: '21km running', achieved: false, dateAchieved: null },
+        { badgeName: '10k steps walking', achieved: true, dateAchieved: '2024-09-20' },
+        { badgeName: '20k steps walking', achieved: false, dateAchieved: null },
+        { badgeName: '30k steps walking', achieved: true, dateAchieved: '2024-09-18' },
+    ]);
+
+    // State to toggle between current and previous month achievements
+    const [showPreviousMonth, setShowPreviousMonth] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState("current");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    // Fetch achievements from the backend
-    useEffect(() => {
-        const fetchAchievements = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const response = await axios.get('http://localhost:3000/badge'); // Update with your actual backend URL
-                const fetchedBadges = response.data;
-
-                // Filter the achievements based on the current and previous months
-                const currentMonth = new Date().getMonth();
-                const currentAchievements = fetchedBadges.filter(badge => new Date(badge.challenge_deadline).getMonth() === currentMonth);
-                const previousAchievements = fetchedBadges.filter(badge => new Date(badge.challenge_deadline).getMonth() === currentMonth - 1);
-
-                setCurrentMonthAchievements(currentAchievements);
-                setPreviousMonthAchievements(previousAchievements);
-            } catch (error) {
-                setError('Failed to fetch badge data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAchievements();
-    }, []);
-
-    // Toggle between current and previous month achievements
+    // Function to toggle between current and previous month badges
     const handleMonthChange = (event) => {
         setSelectedMonth(event.target.value);
+        setShowPreviousMonth(event.target.value === "previous");
     };
 
-    // Determine which achievements to display
-    const achievementsToShow = selectedMonth === "current" ? currentMonthAchievements : previousMonthAchievements;
+    // Determine which achievements to show based on the selected month
+    const achievementsToShow = showPreviousMonth ? previousMonthAchievements : currentMonthAchievements;
 
     return (
         <div>
             <h1>Achievement Badges</h1>
-
-            {/* Loading and Error States */}
-            {loading && <p>Loading...</p>}
-            {error && <p>{error}</p>}
-
             <div>
                 <label htmlFor="monthSelect">Select Month:</label>
                 <select id="monthSelect" value={selectedMonth} onChange={handleMonthChange}>
@@ -60,15 +46,13 @@ const App = ({ user_id }) => {
                     <option value="previous">Previous Month</option>
                 </select>
             </div>
-
-            {/* Display the badges in a list */}
             <div className="badge-list">
                 {achievementsToShow.map((achievement, index) => (
                     <Badge
                         key={index}
-                        badgeName={achievement.badge_name}
-                        achieved={achievement.status === 'completed'}
-                        dateAchieved={achievement.challenge_deadline}
+                        badgeName={achievement.badgeName}
+                        achieved={achievement.achieved}
+                        dateAchieved={achievement.dateAchieved}
                     />
                 ))}
             </div>

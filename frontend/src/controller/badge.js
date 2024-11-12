@@ -1,3 +1,4 @@
+// Badge.js NG WILL EDIT THIS
 import React from 'react';
 import './badge.css'; // Importing the CSS file for styling
 
@@ -15,21 +16,21 @@ import badge20kStepsGray from '../BadgeLogo/20ksteps-gray.jpg';
 import badge30kStepsColor from '../BadgeLogo/30ksteps-color.jpg';
 import badge30kStepsGray from '../BadgeLogo/30ksteps-gray.jpg';
 
-const Badge = ({ badgeName, status, month }) => {
+const Badge = ({ badgeName, achieved, dateAchieved }) => {
     // Determine the badge image based on the badge name and achievement status
     const badgeImages = {
-        '5km running': status === 'completed' ? badge5kmColor : badge5kmGray,
-        '10km running': status === 'completed' ? badge10kmColor : badge10kmGray,
-        '21km running': status === 'completed' ? badge21kmColor : badge21kmGray,
-        '10k steps walking': status === 'completed' ? badge10kStepsColor : badge10kStepsGray,
-        '20k steps walking': status === 'completed' ? badge20kStepsColor : badge20kStepsGray,
-        '30k steps walking': status === 'completed' ? badge30kStepsColor : badge30kStepsGray,
+        '5km running': achieved ? badge5kmColor : badge5kmGray,
+        '10km running': achieved ? badge10kmColor : badge10kmGray,
+        '21km running': achieved ? badge21kmColor : badge21kmGray,
+        '10k steps walking': achieved ? badge10kStepsColor : badge10kStepsGray,
+        '20k steps walking': achieved ? badge20kStepsColor : badge20kStepsGray,
+        '30k steps walking': achieved ? badge30kStepsColor : badge30kStepsGray,
     };
 
     const badgeImage = badgeImages[badgeName] || badge5kmGray; // Default image if no match found
 
     return (
-        <div className={`badge-container ${status}`}>
+        <div className={`badge-container ${achieved ? 'achieved' : 'not-achieved'}`}>
             <div className="badge-icon">
                 <img 
                     src={badgeImage} 
@@ -40,8 +41,7 @@ const Badge = ({ badgeName, status, month }) => {
             </div>
             <div className="badge-info">
                 <p>{badgeName}</p>
-                <p>{month}</p> {/* Display the month of achievement */}
-                {status === 'completed' ? <p>Completed</p> : <p>Status: {status}</p>}
+                {achieved ? <p>Achieved on {dateAchieved}</p> : <p>Not achieved</p>}
             </div>
         </div>
     );
