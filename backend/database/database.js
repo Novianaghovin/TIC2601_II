@@ -132,12 +132,22 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         db.run(`
             CREATE TABLE IF NOT EXISTS badge_type (
                 badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                activity_id INTEGER NOT NULL,
-                badge_name VARCHAR(256),
-                FOREIGN KEY (activity_id) REFERENCES activity_type (activity_id) ON UPDATE CASCADE
+                badge_name VARCHAR(256)
             );
         `);
         
+        // Create leaderboard table
+        db.run(`
+            CREATE TABLE IF NOT EXISTS leaderboard (
+                leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rank INTEGER NOT NULL CHECK (rank > 0),
+                challenge_id INTEGER,
+                user_id INTEGER,
+                distance DECIMAL(5, 2) NOT NULL CHECK (distance > 0),
+                time_stamp DATETIME NOT NULL UNIQUE DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (challenge_id) REFERENCES user_profile(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+            );
+        `);
     }
 });
 
