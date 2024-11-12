@@ -45,8 +45,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 participants_num INTEGER NOT NULL,
                 status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Expired')),
                 badge_id INTEGER NOT NULL,
-                distance INTERGER CHECK(distance IN ('5', '10' ,'21', '42')),
-                target_value INTEGER DEFAULT 100,
                 FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
                 FOREIGN KEY (badge_id) REFERENCES badge_type(badge_id) ON UPDATE CASCADE
             );
@@ -57,7 +55,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             CREATE TABLE IF NOT EXISTS user_challenges (
                 user_challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                challenge_id INTEGER NOT NULL UNIQUE,
+                challenge_id INTEGER NOT NULL,
                 activity_id INTEGER NOT NULL, 
                 status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Completed', 'Expired')),
                 progress DECIMAL(5, 2),
@@ -84,7 +82,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             distance DECIMAL(5, 2) NOT NULL CHECK(distance > 0),
             step_count INTEGER NOT NULL DEFAULT 0 CHECK(step_count >= 0),
             calories_burnt DECIMAL(5, 2),
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            timestamp DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+8 hours')),
             activity_id INTEGER,
             user_id INTEGER NOT NULL,
             FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
@@ -93,7 +91,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
                 ON DELETE CASCADE 
                 ON UPDATE CASCADE
-            );
+        );
         `);
         
         // Create goals table
@@ -102,9 +100,11 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
                 goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 goal_name TEXT NOT NULL,
                 goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
-                progress DECIMAL(5, 2),
+                target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0), -- Column for target distance
+                progress DECIMAL(5, 2) DEFAULT 0,  -- Default progress starts at 0
+                created_date DATE DEFAULT CURRENT_DATE,
                 user_id INTEGER NOT NULL,
-                activity_id INTEGER,
+                activity_id INTEGER, 
                 FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
                     ON DELETE CASCADE 
                     ON UPDATE CASCADE,
@@ -132,22 +132,12 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
         db.run(`
             CREATE TABLE IF NOT EXISTS badge_type (
                 badge_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                badge_name VARCHAR(256)
+                activity_id INTEGER NOT NULL,
+                badge_name VARCHAR(256),
+                FOREIGN KEY (activity_id) REFERENCES activity_type (activity_id) ON UPDATE CASCADE
             );
         `);
         
-        // Create leaderboard table
-        db.run(`
-            CREATE TABLE IF NOT EXISTS leaderboard (
-                leaderboard_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                rank INTEGER NOT NULL CHECK (rank > 0),
-                challenge_id INTEGER,
-                user_id INTEGER,
-                distance DECIMAL(5, 2) NOT NULL CHECK (distance > 0),
-                time_stamp DATETIME NOT NULL UNIQUE DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (challenge_id) REFERENCES user_profile(user_id) ON DELETE CASCADE ON UPDATE CASCADE
-            );
-        `);
     }
 });
 
