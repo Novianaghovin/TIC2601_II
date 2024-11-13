@@ -1,102 +1,90 @@
-/* badge.css */
-
-body {
-    font-family: 'Roboto', sans-serif; /* Change to a nicer font */
-    text-align: center;
-    background-color: #e9ecef; /* Light gray background */
-    margin: 0;
-    padding: 20px;
+/* Container for the entire content */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    height: 100vh; /* Full viewport height */
+    text-align: center; /* Center the text */
+    padding: 20px; /* Add some padding */
 }
 
-h1 {
-    color: #343a40; /* Dark color for the heading */
-    font-size: 2.5em; /* Larger font size for prominence */
-    margin-bottom: 20px; /* Space below the title */
+/* Container for the buttons in the middle */
+.button-container {
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    width: 100%;
+    margin-top: 20px; /* Space from the badges */
 }
 
-/* Container for all badges */
-.badge-list {
-    display: grid; /* Use grid for better layout */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive layout */
+/* Button styling */
+button {
+    margin: 0 10px; /* Space between buttons */
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Container to hold badges side by side */
+.badge-grid {
+    display: flex;
+    justify-content: center; /* Center badges horizontally */
     gap: 20px; /* Space between badges */
-    justify-items: center; /* Center badges */
+    flex-wrap: wrap; /* Allow badges to wrap to the next line if needed */
+    margin-top: 20px; /* Space from the buttons */
 }
 
-/* Individual badge container */
+/* Each individual badge */
 .badge-container {
-    border: 2px solid #ccc; /* Light gray border */
-    border-radius: 10px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
-    width: 180px; /* Set width */
-    background-color: #fff; /* White background */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    display: flex;
+    flex-direction: column; /* Keeps text below the image */
+    align-items: center;
+    width: 200px; /* Width of the badge container */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+    box-sizing: border-box; /* Include padding and border in width calculation */
+    transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
 }
 
+/* Hover effect for the badge container (e.g., scaling up) */
 .badge-container:hover {
-    transform: translateY(-5px); /* Lift effect on hover */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Increase shadow on hover */
+    transform: scale(1.1); /* Slightly enlarge the badge when hovered */
+    cursor: pointer; /* Change cursor to pointer to indicate interactivity */
 }
 
-/* Differentiation for achieved and not achieved badges */
-.badge-container.achieved {
-    border-color: #28a745; /* Green border for achieved */
-}
-
-.badge-container.not-achieved {
-    border-color: #6c757d; /* Gray border for not achieved */
-}
-
-/* Badge icon styling */
+/* Badge image styling (larger image) */
 .badge-icon img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%; /* Circular badges */
-    border: 3px solid #fff; /* White border */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    width: 200px; /* Larger width for the badge image */
+    height: 200px; /* Larger height for the badge image */
+    object-fit: cover; /* Ensures the image fits nicely within the container */
+    transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
 }
 
-/* Title of each badge */
-.badge-info p:first-child {
+/* Hover effect on the badge image (e.g., scaling) */
+.badge-icon:hover img {
+    transform: scale(1.1); /* Enlarge the image when hovered */
+    opacity: 0.8; /* Slightly reduce opacity for hover effect */
+}
+
+/* Centering the text in the middle */
+h1 {
+    font-size: 36px;
     font-weight: bold;
-    font-size: 1.2em; /* Slightly larger font for badge name */
-    margin: 10px 0 5px; /* Margin for spacing */
+    margin-bottom: 20px;
 }
 
-/* Achievement status text */
-.badge-info p {
-    font-size: 0.9em; /* Standard font size */
-    color: #666; /* Gray color for description */
-}
-
-/* Specific color for achievement date */
-.badge-container.achieved .badge-info p:last-child {
-    color: #28a745; /* Green for achieved date */
-}
-
-.badge-container.not-achieved .badge-info p:last-child {
-    color: #999; /* Light gray for not achieved */
-}
-
-/* Style for the month selector */
-label {
-    margin-right: 10px; /* Space between label and dropdown */
-    font-weight: bold; /* Bold label */
-}
-
-select {
-    padding: 8px; /* Padding for the dropdown */
-    font-size: 1em; /* Font size for the dropdown */
-    border-radius: 5px; /* Rounded corners */
-    border: 1px solid #ccc; /* Border for the dropdown */
-}
-
-/* Add this to your existing CSS */
-
-.month-selector {
-    margin-bottom: 30px; /* Add space below the month selector */
-}
-
-.badge-list {
-    margin-top: 20px; /* Optional: add some space above the badge list as well */
+h2 {
+    font-size: 24px;
+    margin-top: 20px;
 }
