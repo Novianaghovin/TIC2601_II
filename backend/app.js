@@ -12,9 +12,11 @@ app.use(express.json());
 
 const user = require('./routes/user');
 const friend = require('./routes/friend');
+const badge = require('./router/badge');
 
 app.use('/user', user);
 app.use('/friend', friend);
+app.use('/badge', badge);
 
 const port = 3001;
 app.listen(port, () => {
