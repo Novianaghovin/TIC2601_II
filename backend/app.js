@@ -10,8 +10,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const user = require('./routes/user');
-const friend = require('./routes/friend');
+const user = require('./router/user');
+const friend = require('./router/friend');
 const badge = require('./router/badge');
 
 app.use('/user', user);
