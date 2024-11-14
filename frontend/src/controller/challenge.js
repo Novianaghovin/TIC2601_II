@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import NavBar from './components/NavBar';
 import { useNavigate } from 'react-router-dom';
 import "./challenge.css";
-
 
 const Challenges = () => {
   const [userId, setUserId] = useState([]); 
@@ -36,7 +34,6 @@ const Challenges = () => {
     }
   }, [activityID]);
 
-  
   const userID = 1; //using Hardcoded user ID 
   
   const fetchUserId = () => {
@@ -54,8 +51,6 @@ const Challenges = () => {
       .catch(error => console.error('Error fetching user ID:', error));
   };
   
-  
-
   const fetchChallengeID = (challengeID) => {
     fetch(`http://localhost:3001/api/get-challenge/${challengeID}`)
       .then(response => {
@@ -94,18 +89,14 @@ const Challenges = () => {
       .catch(error => console.error('Error fetching activity ID:', error));
   };
 
-
-  // Fetch "My Challenges" from the API
   const fetchMyChallenges = (userId) => {
     fetch(`http://localhost:3001/api/my-challenges/${userId}`)
       .then(response => {
         if (!response.ok) throw new Error('Failed to fetch My Challenges');
         return response.json();
       })
-      
       .then(data => {
         const joinedChallenges = data;
-
         
         const detailedChallenges = joinedChallenges.map(joined => {
           const matchingChallenge = availableChallenges.find(
@@ -132,10 +123,9 @@ const Challenges = () => {
   const calculateProgressPercentage = (progress, targetValue) => {
     if (!targetValue || targetValue === 0) return "0%";
     const percentage = Math.min((progress / targetValue) * 100, 100); // Cap at 100%
-    return `${percentage.toFixed(2)}%`; // Display with 2 decimal places
-};
+    return `${percentage.toFixed(2)}%`;
+  };
 
-  // Fetch "Available Challenges" from the API
   const fetchAvailableChallenges = () => {
     fetch('http://localhost:3001/api/available-challenges') 
       .then(response => {
@@ -145,15 +135,12 @@ const Challenges = () => {
         return response.json();
       })
       .then(data => {
-        setAvailableChallenges(data); // Set the "Available Challenges" data in the state
+        setAvailableChallenges(data);
       })
       .catch(error => console.error('Error fetching available challenges:', error));
   };
 
   const joinChallenge = (activityID, challengeID) => {
-    console.log('Join button clicked for challenge ID:', challengeID);
-    console.log('Join button clicked for Activity ID:', activityID);
-
     if (!userId) {
       console.error('Error: User ID not available');
       return;
@@ -171,11 +158,10 @@ const Challenges = () => {
       })
       .then(data => {
         if (data.success) {
-          // Update available and my challenges after joining
           fetchMyChallenges(userId);
           alert(`Successfully joined the challenge!`);
         } else {
-          alert(data.message); // Display message if there's any error
+          alert(data.message);
         }
       })
       .catch(error => console.error('Error joining challenge:', error));
@@ -192,7 +178,7 @@ const Challenges = () => {
       .then(data => {
         if (data.success) {
           alert('Progress has been updated!');
-          fetchMyChallenges(userId); // Refresh "My Challenges" data
+          fetchMyChallenges(userId);
         } else {
           alert('Failed to refresh progress.');
         }
@@ -204,102 +190,96 @@ const Challenges = () => {
   };
 
   const handleViewLeaderboard = (challengeId) => {
-    // Navigate to the leaderboard page with the specific challenge ID
     navigate(`/leaderboard/${challengeId}`);
   };
   
-  
-  
   return (
     <div className="Challenges">
-    <NavBar />
-
-    <div className="container">
-      <h1>My Challenges</h1>
-      <button onClick={refreshProgress}>Refresh Progress</button> 
-      <table>
-        <thead>
-          <tr>
-            <th>Challenge ID</th>
-            <th>Challenge Type</th>
-            <th>Distance(km)</th>
-            <th>Challenge Deadline</th>
-            <th>Activity ID</th>
-            <th>Participants</th>
-            <th>Badge ID</th>
-            <th>Progress</th>
-            <th>Status</th>
-            <th>Leaderboard</th>
-          </tr>
-        </thead>
-        <tbody>
-          {challenges.length === 0 ? (
+      <div className="container">
+        <h1>My Challenges</h1>
+        <button onClick={refreshProgress}>Refresh Progress</button> 
+        <table>
+          <thead>
             <tr>
-              <td colSpan="8">You haven't joined any challenges yet.</td>
+              <th>Challenge ID</th>
+              <th>Challenge Type</th>
+              <th>Distance(km)</th>
+              <th>Challenge Deadline</th>
+              <th>Activity ID</th>
+              <th>Participants</th>
+              <th>Badge ID</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Leaderboard</th>
             </tr>
-          ) : (
-            challenges.map(challenge => (
-              <tr key={challenge.id}>
-                <td>{challenge.challenge_id}</td>
-                <td>{challenge.challenge_type}</td>
-                <td>{challenge.distance}</td>
-                <td>{challenge.challenge_deadline}</td>
-                <td>{challenge.activity_id}</td>
-                <td>{challenge.participants_num || 'N/A'}</td>
-                <td>{challenge.badge_id}</td>
-                <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
-                <td>{challenge.status || 'Active'}</td>
-                <td>
-                  {/* Use handleViewLeaderboard to navigate to the leaderboard */}
+          </thead>
+          <tbody>
+            {challenges.length === 0 ? (
+              <tr>
+                <td colSpan="8">You haven't joined any challenges yet.</td>
+              </tr>
+            ) : (
+              challenges.map(challenge => (
+                <tr key={challenge.id}>
+                  <td>{challenge.challenge_id}</td>
+                  <td>{challenge.challenge_type}</td>
+                  <td>{challenge.distance}</td>
+                  <td>{challenge.challenge_deadline}</td>
+                  <td>{challenge.activity_id}</td>
+                  <td>{challenge.participants_num || 'N/A'}</td>
+                  <td>{challenge.badge_id}</td>
+                  <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
+                  <td>{challenge.status || 'Active'}</td>
+                  <td>
                     <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>View Leaderboard</button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
 
-      <div className = "challenge-header"></div>   
-      <h1>Available Challenges</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Challenge ID</th>
-            <th>Challenge Type</th>
-            <th>Distance(km)</th>
-            <th>Challenge Deadline</th>
-            <th>Participants Num</th>
-            <th>Activity ID</th>
-            <th>Badge ID</th>
-            <th>Status</th>
-            <th>Join</th>
-          </tr>
-        </thead>
-        <tbody>
-          {availableChallenges.length === 0 ? (
+        <div className="challenge-header"></div>   
+        <h1>Available Challenges</h1>
+        <table>
+          <thead>
             <tr>
-              <td colSpan="8">No challenges available.</td>
+              <th>Challenge ID</th>
+              <th>Challenge Type</th>
+              <th>Distance(km)</th>
+              <th>Challenge Deadline</th>
+              <th>Participants Num</th>
+              <th>Activity ID</th>
+              <th>Badge ID</th>
+              <th>Status</th>
+              <th>Join</th>
             </tr>
-          ) : (
-            availableChallenges.map(challenge => (
-              <tr key={challenge.id}>
-                <td>{challenge.challenge_id}</td>
-                <td>{challenge.challenge_type}</td>
-                <td>{challenge.distance}</td>
-                <td>{challenge.challenge_deadline}</td>
-                <td>{challenge.participants_num || '0'}</td>
-                <td>{challenge.activity_id}</td>
-                <td>{challenge.badge_id}</td>
-                <td>{challenge.status || 'Active'}</td>
-                <td>
-                <button onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}>Join</button>
-                </td>
+          </thead>
+          <tbody>
+            {availableChallenges.length === 0 ? (
+              <tr>
+                <td colSpan="8">No challenges available.</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            ) : (
+              availableChallenges.map(challenge => (
+                <tr key={challenge.id}>
+                  <td>{challenge.challenge_id}</td>
+                  <td>{challenge.challenge_type}</td>
+                  <td>{challenge.distance}</td>
+                  <td>{challenge.challenge_deadline}</td>
+                  <td>{challenge.participants_num || '0'}</td>
+                  <td>{challenge.activity_id}</td>
+                  <td>{challenge.badge_id}</td>
+                  <td>{challenge.status || 'Active'}</td>
+                  <td>
+                    <button onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}>Join</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
