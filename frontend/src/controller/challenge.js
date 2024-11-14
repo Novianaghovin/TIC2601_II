@@ -10,6 +10,8 @@ const Challenges = () => {
   const [challenges, setChallenges] = useState([]); // "My Challenges"
   const [activityID, setActivityID] = useState([]);
   const [availableChallenges, setAvailableChallenges] = useState([]); // "Available Challenges"
+  const [filteredChallenges, setFilteredChallenges] = useState([]); // Filtered challenges based on search
+  const [searchQuery, setSearchQuery] = useState(''); // Search input value
 
   const navigate = useNavigate();
 
@@ -35,6 +37,11 @@ const Challenges = () => {
       fetchActivityID(activityID);
     }
   }, [activityID]);
+
+  // Synchronize filteredChallenges with challenges when challenges update
+  useEffect(() => {
+    setFilteredChallenges(challenges);
+  }, [challenges]);
 
   
   const userID = 1; //using Hardcoded user ID 
@@ -207,7 +214,23 @@ const Challenges = () => {
     // Navigate to the leaderboard page with the specific challenge ID
     navigate(`/leaderboard/${challengeId}`);
   };
-  
+
+  // Handle search input changes
+  const handleSearchChange = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter challenges based on the search query
+    const filtered = challenges.filter((challenge) =>
+      challenge.challenge_type.toLowerCase().includes(query) ||
+    (challenge.distance && challenge.distance.toString().includes(query)) ||  
+      challenge.challenge_id.toString().includes(query) ||
+      challenge.activity_id.toString().includes(query) ||
+      challenge.status.toLowerCase().includes(query)
+    );
+
+    setFilteredChallenges(filtered);
+  };
   
   
   return (
@@ -215,30 +238,43 @@ const Challenges = () => {
     <NavBar />
 
     <div className="container">
-      <h1>My Challenges</h1>
-      <button onClick={refreshProgress}>Refresh Progress</button> 
-      <table>
-        <thead>
-          <tr>
-            <th>Challenge ID</th>
-            <th>Challenge Type</th>
-            <th>Distance(km)</th>
-            <th>Challenge Deadline</th>
-            <th>Activity ID</th>
-            <th>Participants</th>
-            <th>Badge ID</th>
-            <th>Progress</th>
-            <th>Status</th>
-            <th>Leaderboard</th>
-          </tr>
-        </thead>
+    <div className="header-container">
+    <h1 className="title">My Challenges</h1>
+    <div className="search-container">
+      <input
+        type="text"
+        placeholder="Search challenges..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+        className="search-bar"
+      />
+    </div>
+  </div>
+
+  <button onClick={refreshProgress}>Refresh</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Challenge ID</th>
+        <th>Challenge Type</th>
+        <th>Distance(km)</th>
+        <th>Challenge Deadline</th>
+        <th>Activity ID</th>
+        <th>Participants</th>
+        <th>Badge ID</th>
+        <th>Progress</th>
+        <th>Status</th>
+        <th>Leaderboard</th>
+      </tr>
+    </thead>
         <tbody>
           {challenges.length === 0 ? (
             <tr>
               <td colSpan="8">You haven't joined any challenges yet.</td>
             </tr>
           ) : (
-            challenges.map(challenge => (
+            filteredChallenges.map(challenge => (
               <tr key={challenge.id}>
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
@@ -260,7 +296,7 @@ const Challenges = () => {
       </table>
 
       <div className = "challenge-header"></div>   
-      <h1>Available Challenges</h1>
+      <h1 className="title">Available Challenges</h1>
       <table>
         <thead>
           <tr>

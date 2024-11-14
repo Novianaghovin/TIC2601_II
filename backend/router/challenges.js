@@ -2,12 +2,16 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
+const leaderboardroute = require('./leaderboard');
 const app = express();
+const router = express.Router();
 const port = 3001;
 
 /* Middleware */ 
 app.use(cors());
 app.use(express.json());
+
+router.use('/leaderboard', leaderboardroute);
 
 // Define the path to the existing database file
 const DB_PATH = path.resolve(__dirname, '../database/database.db');
