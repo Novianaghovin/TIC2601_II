@@ -76,15 +76,15 @@ AFTER INSERT ON activity_log
 BEGIN
     UPDATE goals
     SET progress = (
-        SELECT MIN(100, SUM(al.distance) * 100.0 / g.target_distance)
+        SELECT MIN(100, SUM(al.distance) * 100.0 / goals.target_distance)
         FROM activity_log al
-        WHERE al.user_id = g.user_id 
-          AND al.activity_id = g.activity_id
-          AND al.timestamp >= g.created_date
-          AND al.timestamp <= g.goal_deadline
+        WHERE al.user_id = goals.user_id 
+          AND al.activity_id = goals.activity_id
+          AND al.timestamp >= goals.created_date
+          AND al.timestamp <= goals.goal_deadline
     )
-    WHERE g.user_id = NEW.user_id 
-      AND g.activity_id = NEW.activity_id;
+    WHERE goals.user_id = NEW.user_id 
+      AND goals.activity_id = NEW.activity_id;
 END;
 
 
