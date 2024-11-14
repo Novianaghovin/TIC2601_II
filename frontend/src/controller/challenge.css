@@ -1,96 +1,102 @@
 /* General styles for the entire page */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-  }
-  
-  h1 {
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  /* Container to give padding and center content */
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.challenge-header {
+  display: flex;
+  align-items: center;  /* Aligns items vertically center */
+  justify-content: space-between;  /* Puts space between the items */
+  margin-bottom: 20px;  /* Optional: Adds some space below the header */
+}
+
+/* Container to give padding and center content */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 50px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles for the tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border: 1px solid #ddd; /* Ensures the outer table border is visible */
+}
+
+th, td {
+  padding: 12px;
+  border: 1px solid #ddd; /* Ensures all table cells have borders */
+  text-align: left;
+}
+
+/* Ensures table header styling */
+th {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff; /* Ensures the header cells have borders */
+}
+
+/* Alternate row background color */
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+/* Button styles */
+button {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Styling links as buttons */
+a.button {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+a.button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive layout for smaller devices */
+@media (max-width: 768px) {
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
   }
-  
-  /* Styles for the tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    border: 1px solid #ddd; /* Ensures the outer table border is visible */
+
+  table, th, td {
+      font-size: 14px;
   }
-  
-  th, td {
-    padding: 12px;
-    border: 1px solid #ddd; /* Ensures all table cells have borders */
-    text-align: left;
-  }
-  
-  /* Ensures table header styling */
-  th {
-    background-color: #007bff;
-    color: white;
-    border: 1px solid #007bff; /* Ensures the header cells have borders */
-  }
-  
-  /* Alternate row background color */
-  tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  
-  /* Button styles */
+
   button {
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+      font-size: 14px;
   }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Styling links as buttons */
-  a.button {
-    display: inline-block;
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  a.button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Responsive layout for smaller devices */
-  @media (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
-  
-    table, th, td {
-        font-size: 14px;
-    }
-  
-    button {
-        font-size: 14px;
-    }
-  }
-  
+}
