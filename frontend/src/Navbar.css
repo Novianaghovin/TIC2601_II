@@ -1,15 +1,15 @@
 /* Navbar general styles */
 .navbar {
   display: flex;
-  justify-content: flex-start;  /* Align items to the left */
+  justify-content: center; /* Center items horizontally */
   align-items: center;
   background-color: #333;
   padding: 10px;
-  position: fixed;  /* Fixes the navbar at the top */
+  position: fixed; /* Fixes the navbar at the top */
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;    /* Keeps the navbar above other content */
+  z-index: 1000; /* Keeps the navbar above other content */
 }
 
 /* Style for each navigation button */
@@ -26,7 +26,7 @@
 
 /* Add a white line (border) between navbar items */
 .nav-button:not(:last-child) {
-  border-right: 1px solid white;  /* Adds a white line to the right of each item, except the last */
+  border-right: 1px solid white; /* Adds a white line to the right of each item, except the last */
 }
 
 .nav-button:hover {
@@ -51,5 +51,5 @@
 
 /* Optional: Add some padding to the body so that the content isn't hidden under the navbar */
 body {
-  margin-top: 60px;  /* Adjust this depending on the height of your navbar */
+  margin-top: 60px; /* Adjust this depending on the height of your navbar */
 }
