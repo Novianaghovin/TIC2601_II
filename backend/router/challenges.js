@@ -2,7 +2,6 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
-
 const app = express();
 const port = 3001;
 
@@ -36,43 +35,50 @@ app.get('/api/available-challenges', (req, res) => {
 });
 
 // Route for users to join a challenge
-app.post('/api/join-challenge/:userId/:challengeId', (req, res) => {
-    const { userId, challengeId } = req.params;
+app.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
+    const { userId, challengeId, activityId } = req.params;
   
     // Check if the user is already part of the challenge
-    db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ?', [userId, challengeId], (err, row) => {
-      if (err) {
-        console.error('Error checking existing entry:', err.message);
-        return res.status(500).json({ success: false, message: 'Database query failed' });
-      }
-      
-      if (row) {
-        return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
-      }
+    db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
+        if (err) {
+            console.error('Error checking existing entry:', err.message);
+            return res.status(500).json({ success: false, message: 'Database query failed' });
+        }
+        if (row) {
+            return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
+        }
   
-      // Insert new entry if not already joined
-      db.run('INSERT INTO user_challenges (user_id, challenge_id, status) VALUES (?, ?, ?)',
-        [userId, challengeId, 'Active'], function(err) {
-          if (err) {
-            console.error('Error joining challenge:', err.message);
-            return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
-          }
-  
-          res.json({ success: true, message: 'Successfully joined the challenge!' });
-        });
+        // Insert new entry if not already joined
+        db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
+            [userId, challengeId, activityId, 'Active', '0'], function(err) {
+                if (err) {
+                    console.error('Error joining challenge:', err.message);
+                    return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
+                }
+
+                // Increment participants count in the avail_challenges table
+                db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function(err) {
+                    if (err) {
+                        console.error('Error updating participants count:', err.message);
+                        return res.status(500).json({ success: false, message: 'Failed to update participants count.' });
+                    }
+                    res.json({ success: true, message: 'Successfully joined the challenge!' });
+                });
+            }
+        );
     });
-  });
+});
+
   
 
 // Route to fetch "My Challenges" (challenges the user has joined)
 app.get('/api/my-challenges/:userId', (req, res) => {
-    const userId = req.params;
+    const userId = req.params.userId;
 
     // SQL query to fetch the challenges that the user has joined
     const sql = `
-        SELECT uc.*
+        SELECT *
         FROM user_challenges uc
-        JOIN avail_challenges ac ON uc.challenge_id = ac.challenge_id
         WHERE uc.user_id = ? `;
 
     db.all(sql, [userId], (err, rows) => {
@@ -82,6 +88,115 @@ app.get('/api/my-challenges/:userId', (req, res) => {
             return;
         }
         res.json(rows); // Return the joined challenges for the user
+    });
+});
+
+// Route to refresh progress for all user challenges
+app.post('/api/refresh-progress/:userId', (req, res) => {
+    const userId = req.params.userId; 
+
+    // Fetch all challenges for the user along with their distances
+    const fetchChallengesQuery = `
+    SELECT uc.challenge_id, uc.user_id, ac.distance
+    FROM user_challenges AS uc
+    JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
+    WHERE uc.user_id = ?`;
+
+    db.all(fetchChallengesQuery, [userId], (err, challenges) => {
+        if (err) {
+            console.error('Error fetching user challenges:', err.message);
+            return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
+        }
+
+        // Iterate over each challenge and calculate progress
+        challenges.forEach(challenge => {   
+            const { user_id, distance, challenge_id} = challenge;
+
+            // Calculate total distance for this challenge
+            const totalDistanceQuery = `SELECT SUM(distance) AS totalDistance FROM activity_log WHERE user_id = ?`;
+
+            db.get(totalDistanceQuery, [user_id], (err, row) => {
+                if (err) {
+                    console.error('Error calculating total distance:', err.message);
+                    return;
+                }
+
+                const totalDistance = row.totalDistance || 0;
+
+                // Calculate progress percentage
+                let progress = (totalDistance / distance) * 100;
+                if (progress >= 100) {
+                    progress = 100; // Cap progress at 100%
+                }
+                const status = progress >= 100 ? 'Completed' : 'Active';
+
+                // Update the user's progress and status in the user_challenges table
+                db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
+                    [progress, status, user_id, challenge_id], function(err) {
+                    if (err) {
+                        console.error('Error updating progress:', err.message);
+                    }
+                });
+            });
+        });
+    });
+
+    // Send a response back once all updates are complete
+    res.json({ success: true, message: 'Progress has been updated for all challenges.' });
+});
+
+
+
+// Route to fetch activity id from the database
+app.get('/api/get-activity/:activityID', (req, res) => {
+    const activityId = req.params.activityID;
+
+    // Check if activity id is a valid number
+    if (isNaN(activityId)) {
+        return res.status(400).json({ error: 'Invalid Activity ID' });
+    }
+
+    console.log('Fetching Activity ID:', activityId);
+
+    // Query the database to fetch the activity_id from the avail_challenges table
+    db.get('SELECT * FROM avail_challenges WHERE activity_id = ?', [activityId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Database query failed' });
+            return;
+        }
+        if (row) {
+            res.json(row);
+        } else {
+            res.status(404).json({ message: 'Activity ID not found' });
+        }
+    });
+});
+
+
+// Route to fetch challenge id from the database
+app.get('/api/get-challenge/:challengeID', (req, res) => {
+    const challengeId = req.params.challengeID;
+
+    // Check if challenge ID is a valid number
+    if (isNaN(challengeId)) {
+        return res.status(400).json({ error: 'Invalid Challenge ID' });
+    }
+
+    console.log('Fetching Challenge ID:', challengeId);
+
+    // Query the database to fetch the challenge_id from the avail_challenges table
+    db.get('SELECT * FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, row) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Database query failed' });
+            return;
+        }
+        if (row) {
+            res.json(row);
+        } else {
+            res.status(404).json({ message: 'Challenge not found' });
+        }
     });
 });
 
