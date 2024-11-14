@@ -2,11 +2,11 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 
 const router = express.Router();
-const db = new sqlite3.Database('../database/database.db');
+const db = new sqlite3.Database('./database/database.db');
 
 // Get all goals for a specific user with progress included
 router.get('/', (req, res) => {
-    const userId = req.query.user_id; // Get the user ID from the query params
+    const userId = req.query.user_id;
 
     if (!userId) {
         return res.status(400).json({ error: 'User ID is required to view goals.' });
@@ -16,8 +16,7 @@ router.get('/', (req, res) => {
         SELECT g.goal_id, g.goal_name, g.goal_deadline, g.target_distance, g.progress, g.user_id, 
                at.activity_name
         FROM goals g
-        JOIN activity_log al ON g.activity_id = al.log_id
-        JOIN activity_type at ON al.activity_id = at.activity_id
+        JOIN activity_type at ON g.activity_id = at.activity_id
         WHERE g.user_id = ?
     `;
 
@@ -29,7 +28,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// Create a new goal for a user
+// Create a new goal for a user with datetime for deadline
 router.post('/', (req, res) => {
     const { goal_name, goal_deadline, target_distance, user_id, activity_id } = req.body;
 
@@ -37,7 +36,7 @@ router.post('/', (req, res) => {
         return res.status(400).json({ error: 'Goal name, deadline, target distance, user ID, and activity type are required.' });
     }
 
-    const progress = 0.0; // Initial progress
+    const progress = 0.0;
 
     const sqlInsert = `
         INSERT INTO goals (goal_name, goal_deadline, target_distance, progress, user_id, activity_id)
@@ -61,7 +60,7 @@ router.post('/', (req, res) => {
     });
 });
 
-// Update a goal
+// Update a goal with datetime for deadline
 router.put('/:goal_id', (req, res) => {
     const goalId = req.params.goal_id;
     const { goal_name, goal_deadline, target_distance, user_id, activity_id } = req.body;
@@ -95,13 +94,12 @@ router.put('/:goal_id', (req, res) => {
 // Delete a goal for a user
 router.delete('/:goal_id', (req, res) => {
     const goalId = req.params.goal_id;
-    const userId = req.query.user_id; // Get the user ID from the query params
+    const userId = req.query.user_id;
 
     if (!userId) {
         return res.status(400).json({ error: 'User ID is required.' });
     }
 
-    // Check if the goal exists and belongs to the user
     db.get('SELECT * FROM goals WHERE goal_id = ? AND user_id = ?', [goalId, userId], (err, goal) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -110,7 +108,6 @@ router.delete('/:goal_id', (req, res) => {
             return res.status(404).json({ error: 'Goal not found or not owned by the user.' });
         }
 
-        // Delete the goal
         db.run('DELETE FROM goals WHERE goal_id = ? AND user_id = ?', [goalId, userId], function(err) {
             if (err) {
                 return res.status(500).json({ error: 'Error deleting goal: ' + err.message });

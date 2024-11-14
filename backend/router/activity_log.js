@@ -1,7 +1,13 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
-const db = new sqlite3.Database('../database/database.db');
+const db = new sqlite3.Database('./database/database.db');
+
+// Example route for testing
+router.get('/', (req, res) => {
+    res.send('Activity log route is working!');
+});
+
 
 // Get all activity logs by user ID (User can only view their own activities)
 router.get('/user/:user_id', (req, res) => {
