@@ -10,16 +10,16 @@
 
 /* Header and titles */
 .title {
-  font-size: 28px;
+  font-size: 30px;
   white-space: nowrap;
-  color: black; 
-  margin-bottom: 10px; 
+  color: black; /* Changing color to black */
+  margin-bottom: 10px; /* Adjust spacing below the title as needed */
 }
 
 /* Header and search area styles */
 .header-container {
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between; /* Distributes space between and around items */
   align-items: center;
   margin-top: 50px;
 }
@@ -38,21 +38,36 @@
 }
 
 .refresh-button {
-  margin-left: 15px; 
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.refresh-button:hover {
+  background-color: #0056b3;
 }
 
 /* Table styling with borders */
 table {
   width: 100%;
-  border-collapse: collapse; 
+  border-collapse: collapse; /* Use collapse for consistent borders */
   margin-top: 20px;
   background-color: #fff;
-  border: 1px solid #ddd; 
+  border: 1px solid #ddd; /* Add a border to the table */
 }
 
 th, td {
-  border: 1px solid #ddd; 
-  padding: 8px; 
+  border: 1px solid #ddd; /* Add borders to table cells */
+  padding: 8px; /* Add padding for better readability */
   text-align: left;
 }
 
@@ -62,9 +77,10 @@ th {
   border-color: #007bff;
 }
 
+
 /* Makes table more defined */
 .table-bordered {
-  border: 2px solid #007bff; 
+  border: 2px solid #007bff; /* Adds border around the table */
 }
 
 @media (max-width: 768px) {
@@ -82,7 +98,7 @@ th {
   }
 
   .refresh-button {
-    margin-top: 10px; 
+    margin-top: 10px; /* Adds space between the search bar and the button on small screens */
   }
 
   table, th, td {
