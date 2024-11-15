@@ -13,6 +13,9 @@ app.use(express.json());
 
 router.use('/leaderboard', leaderboardroute);
 
+// Use the router for all app routes
+app.use('/', router);
+
 // Define the path to the existing database file
 const DB_PATH = path.resolve(__dirname, '../database/database.db');
 
@@ -26,7 +29,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 });
 
 // Route to fetch available challenges 
-app.get('/api/available-challenges', (req, res) => {
+router.get('/api/available-challenges', (req, res) => {
     const sql = `SELECT * FROM avail_challenges`; // Adjust the condition based on your data structure
     db.all(sql, [], (err, rows) => {
         if (err) {
@@ -39,7 +42,7 @@ app.get('/api/available-challenges', (req, res) => {
 });
 
 // Route for users to join a challenge
-app.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
+router.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
     const { userId, challengeId, activityId } = req.params;
   
     // Check if the user is already part of the challenge
@@ -76,7 +79,7 @@ app.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) => {
   
 
 // Route to fetch "My Challenges" (challenges the user has joined)
-app.get('/api/my-challenges/:userId', (req, res) => {
+router.get('/api/my-challenges/:userId', (req, res) => {
     const userId = req.params.userId;
 
     // SQL query to fetch the challenges that the user has joined
@@ -96,7 +99,7 @@ app.get('/api/my-challenges/:userId', (req, res) => {
 });
 
 // Route to refresh progress for all user challenges
-app.post('/api/refresh-progress/:userId', (req, res) => {
+router.post('/api/refresh-progress/:userId', (req, res) => {
     const userId = req.params.userId; 
 
     // Fetch all challenges for the user along with their distances and deadline
@@ -156,7 +159,7 @@ app.post('/api/refresh-progress/:userId', (req, res) => {
 
 
 // Route to fetch activity id from the database
-app.get('/api/get-activity/:activityID', (req, res) => {
+router.get('/api/get-activity/:activityID', (req, res) => {
     const activityId = req.params.activityID;
 
     // Check if activity id is a valid number
@@ -183,7 +186,7 @@ app.get('/api/get-activity/:activityID', (req, res) => {
 
 
 // Route to fetch challenge id from the database
-app.get('/api/get-challenge/:challengeID', (req, res) => {
+router.get('/api/get-challenge/:challengeID', (req, res) => {
     const challengeId = req.params.challengeID;
 
     // Check if challenge ID is a valid number
@@ -209,7 +212,7 @@ app.get('/api/get-challenge/:challengeID', (req, res) => {
 });
 
 // Route to fetch user id from the database
-app.get('/api/get-user/:userID', (req, res) => {
+router.get('/api/get-user/:userID', (req, res) => {
     const userID = req.params.userID;
 
     // Check if userID is a valid number
