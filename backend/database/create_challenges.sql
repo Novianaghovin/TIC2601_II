@@ -29,7 +29,7 @@ INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, p
 ('Running',  '2023-10-31', 1, 50, 'Active', 1, 5),
 ('Running',  '2023-11-31', 2, 50, 'Active', 2, 10),
 ('Running',  '2023-12-31', 3, 50, 'Active', 3, 21),
-('Walking',  '2024-01-01', 4, 50, 'Active', 4, 5)
+('Walking',  '2024-01-01', 4, 50, 'Active', 4, 5);
 
 INSERT INTO user_challenges (user_id, challenge_id,activity_id, status, progress) VALUES
 (1, 1, 1, 'Active', 0.00),
