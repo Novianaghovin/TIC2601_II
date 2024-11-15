@@ -10,7 +10,7 @@
 
 /* Header and titles */
 .title {
-  font-size: 28px;
+  font-size: 30px;
   white-space: nowrap;
   color: black; /* Changing color to black */
   margin-bottom: 10px; /* Adjust spacing below the title as needed */
@@ -38,7 +38,22 @@
 }
 
 .refresh-button {
-  margin-left: 15px; /* Adds spacing between search bar and button */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.refresh-button:hover {
+  background-color: #0056b3;
 }
 
 /* Table styling with borders */
