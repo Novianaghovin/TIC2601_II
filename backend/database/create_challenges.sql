@@ -10,7 +10,7 @@
     distance INTEGER NOT NULL,
     target_value DEFAULT 100,
     FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
-    FOREIGN KEY (badge_id) REFERENCES badge_type(badge_id) ON UPDATE CASCADE,
+    FOREIGN KEY (badge_id) REFERENCES badge_type(badge_id) ON UPDATE CASCADE
 );
 
 CREATE TABLE user_challenges (
@@ -20,9 +20,10 @@ CREATE TABLE user_challenges (
     activity_id INTEGER NOT NULL,
     status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Completed')),
     progress DECIMAL(5,2),
+    joined_at DATE DEFAULT(CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON UPDATE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES avail_challenges(challenge_id) ON UPDATE CASCADE
-    FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
+    FOREIGN KEY (challenge_id) REFERENCES avail_challenges(challenge_id) ON UPDATE CASCADE,
+    FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE
 );
 
 INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status , badge_id, distance) VALUES
