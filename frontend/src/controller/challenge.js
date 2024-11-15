@@ -121,6 +121,7 @@ const Challenges = () => {
           return {
             challenge_id: joined.challenge_id,
             activity_id: joined.activity_id,
+            joined_on: joined.joined_at,
             distance: matchingChallenge ? matchingChallenge.distance : 'N/A',
             participants_num: matchingChallenge ? matchingChallenge.participants_num : 'N/A',
             progress: joined.progress,
@@ -275,10 +276,9 @@ const Challenges = () => {
         <th>Challenge ID</th>
         <th>Challenge Type</th>
         <th>Distance(km)</th>
+        <th>Joined On</th>
         <th>Challenge Deadline</th>
-        <th>Activity ID</th>
         <th>Participants</th>
-        <th>Badge ID</th>
         <th>Progress</th>
         <th>Status</th>
         <th>Leaderboard</th>
@@ -291,14 +291,13 @@ const Challenges = () => {
             </tr>
           ) : (
             filteredChallenges.map(challenge => (
-              <tr key={challenge.id}>
+              <tr key={challenge.id}> 
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
                 <td>{challenge.distance}</td>
+                <td>{challenge.joined_on}</td>
                 <td>{challenge.challenge_deadline}</td>
-                <td>{challenge.activity_id}</td>
                 <td>{challenge.participants_num || 'N/A'}</td>
-                <td>{challenge.badge_id}</td>
                 <td>{calculateProgressPercentage(challenge.progress, challenge.target_value)}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
@@ -321,8 +320,6 @@ const Challenges = () => {
             <th>Distance(km)</th>
             <th>Challenge Deadline</th>
             <th>Participants Num</th>
-            <th>Activity ID</th>
-            <th>Badge ID</th>
             <th>Status</th>
             <th>Join</th>
           </tr>
@@ -340,8 +337,6 @@ const Challenges = () => {
                 <td>{challenge.distance}</td>
                 <td>{challenge.challenge_deadline}</td>
                 <td>{challenge.participants_num || '0'}</td>
-                <td>{challenge.activity_id}</td>
-                <td>{challenge.badge_id}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
                 <button
