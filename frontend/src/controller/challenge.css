@@ -44,16 +44,16 @@
 /* Table styling with borders */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse; /* Use collapse for consistent borders */
   margin-top: 20px;
   background-color: #fff;
+  border: 1px solid #ddd; /* Add a border to the table */
 }
 
 th, td {
+  border: 1px solid #ddd; /* Add borders to table cells */
+  padding: 8px; /* Add padding for better readability */
   text-align: left;
-  padding: 12px;
-  border: 1px solid #ddd; /* Adds border to each cell */
 }
 
 th {
@@ -61,6 +61,7 @@ th {
   color: white;
   border-color: #007bff;
 }
+
 
 /* Makes table more defined */
 .table-bordered {
