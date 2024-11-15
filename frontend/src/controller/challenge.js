@@ -233,10 +233,11 @@ const Challenges = () => {
     // Filter challenges based on the search query
     const filtered = challenges.filter((challenge) =>
       challenge.challenge_type.toLowerCase().includes(query) ||
-    (challenge.distance && challenge.distance.toString().includes(query)) ||  
+     (challenge.distance && challenge.distance.toString().includes(query)) ||  
       challenge.challenge_id.toString().includes(query) ||
       challenge.activity_id.toString().includes(query) ||
-      challenge.status.toLowerCase().includes(query)
+      challenge.status.toLowerCase().includes(query) ||
+      (challenge.progress && challenge.progress.toString().includes(query))
     );
 
     setFilteredChallenges(filtered);
