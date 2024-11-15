@@ -24,17 +24,17 @@ CREATE TABLE activity_log (
 CREATE TABLE goals (
     goal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     goal_name TEXT NOT NULL,
-    goal_deadline DATE NOT NULL CHECK(goal_deadline >= CURRENT_DATE),
-    target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0), -- Column for target distance
-    progress DECIMAL(5, 2) DEFAULT 0,  -- Default progress starts at 0
-    created_date DATE DEFAULT CURRENT_DATE,
+    goal_deadline DATETIME NOT NULL CHECK(goal_deadline >= CURRENT_TIMESTAMP),
+    target_distance DECIMAL(5, 2) NOT NULL CHECK(target_distance > 0),
+    progress DECIMAL(5, 2) DEFAULT 0,
+    created_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, '+8 hours')),
     user_id INTEGER NOT NULL,
-    activity_id INTEGER, 
-    FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id) 
-        ON DELETE CASCADE 
+    activity_id INTEGER,
+    FOREIGN KEY (activity_id) REFERENCES activity_type(activity_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES user_registration(user_id) 
-        ON DELETE CASCADE 
+    FOREIGN KEY (user_id) REFERENCES user_registration(user_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
@@ -76,15 +76,15 @@ AFTER INSERT ON activity_log
 BEGIN
     UPDATE goals
     SET progress = (
-        SELECT MIN(100, SUM(al.distance) * 100.0 / g.target_distance)
+        SELECT MIN(100, SUM(al.distance) * 100.0 / goals.target_distance)
         FROM activity_log al
-        WHERE al.user_id = g.user_id 
-          AND al.activity_id = g.activity_id
-          AND al.timestamp >= g.created_date
-          AND al.timestamp <= g.goal_deadline
+        WHERE al.user_id = goals.user_id 
+          AND al.activity_id = goals.activity_id
+          AND al.timestamp >= goals.created_date
+          AND al.timestamp <= goals.goal_deadline
     )
-    WHERE g.user_id = NEW.user_id 
-      AND g.activity_id = NEW.activity_id;
+    WHERE goals.user_id = NEW.user_id 
+      AND goals.activity_id = NEW.activity_id;
 END;
 
 
