@@ -1,134 +1,69 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
-const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('./db/user_friendship.db', (err) => {
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const authenticateToken = require('../authenticateToken'); // Import middleware
+
+const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) => {
     if (err) {
         console.error('Error opening database: ' + err.message);
         process.exit(1);
     } else {
-        console.log('Connected to the user_friendship database.');
+        console.log('Connected to the database.');
     }
 });
 
-const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.loggedin) {
-        return next(); // User is authenticated, proceed to the next route
-    } else {
-        return res.status(401).json({ error: 'You must be logged in to access this page' });
-    }
-};
+console.log('Friend route loaded');
+router.use(authenticateToken);
 
-router.use(isAuthenticated);
-
-
-// SEARCH FOR USER BY EMAIL IN ORDER TO SEND FRIEND REQUEST
-// In Postman: http://localhost:3000/friendship/search?email=<user_email>
-// replace <user_email> with the actual email searching for
+// SEARCH FOR USER BY EMAIL TO SEND FRIEND REQUEST
 router.get('/search', (req, res) => {
-    const { email } = req.query;    // search for another use by email
-
-    if (!email) {
-        return res.status(400).json({ error: 'A valid email is required.' });
-    }
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ error: 'A valid email is required.' });
 
     const query = 'SELECT user_id, first_name, last_name FROM user_registration WHERE email = ?';
-
     db.get(query, [email], (err, user) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (!user) {
-            return res.status(404).json({ error: 'No user found with this email.' });
-        }
-        res.json(user);
+        if (err) return res.status(500).json({ error: err.message });
+        if (!user) return res.status(404).json({ error: 'No user found with this email.' });
+        res.status(200).json(user);
     });
 });
 
 
 // SEND FRIENDSHIP REQUEST
-/**
- * Pre-conditions: set-up new environment in Postman. Set 'Variable' to "responder_id" and 'Type' = default
- * In body, type in { "responder_id": "{{responder_id}} "
- */
 router.post('/request', (req, res) => {
     const responder_id = String(req.body.responder_id);
-    const requester_id = String(req.session.userID);    // Use the user ID from the session as the requester_id
-    
-    console.log('Requester ID:', requester_id);
-    console.log('Responder ID:', responder_id);
+    const requester_id = String(req.user.userId);
+    if (!responder_id || requester_id === responder_id) return res.status(400).json({ error: 'Invalid friend request.' });
 
-    if (!responder_id) {
-        return res.status(400).json({ error: 'Responder id is required.' });
-    }
-        
-    if (requester_id === responder_id) {
-            return res.status(400).json({ error: 'You cannot send a friendship request to yourself.' });
-    }
-
-    const query = `
-        INSERT INTO friendship (requester_id, responder_id, status)
-        VALUES (?, ?, 'Pending')
-    `;
-
-    // Check for existing pending friendship request
     const checkQuery = `
         SELECT * FROM friendship 
         WHERE (requester_id = ? AND responder_id = ?) OR (requester_id = ? AND responder_id = ?)
-        AND status = 'Pending'
+        AND (status = 'Pending' OR status = 'Accepted')
     `;
-
-    db.get(checkQuery, [requester_id, responder_id, responder_id, requester_id], (err, existingRequest) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
+    db.get(checkQuery, [requester_id, responder_id, responder_id, requester_id], (err, existingRelationship) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (existingRelationship) {
+            const message = existingRelationship.status === 'Pending'
+                ? 'Request already pending.'
+                : 'You are already friends with this user.';
+            return res.status(400).json({ error: message });
         }
-        if (existingRequest) {
-            return res.status(400).json({ error: 'Friend request already pending.' });
-        }
 
-        // Insert new friendship request
-        const query = `
-            INSERT INTO friendship (requester_id, responder_id, status)
-            VALUES (?, ?, 'Pending')
-        `;
-
-        db.run(query, [requester_id, responder_id], function(err) {
-            if (err) {
-                if (err.code === 'SQLITE_CONSTRAINT') {
-                    return res.status(400).json({ error: 'Friend request already exists.' });
-                }
-                return res.status(500).json({ error: err.message });
-            }
-
-            res.status(201).json({ message: 'Friend request sent successfully.', friendship_id: this.lastID });
+        // Insert the friend request as pending if no relationship exists
+        const insertQuery = `INSERT INTO friendship (requester_id, responder_id, status) VALUES (?, ?, 'Pending')`;
+        db.run(insertQuery, [requester_id, responder_id], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.status(201).json({ message: 'Friend request sent.', friendship_id: this.lastID });
         });
     });
 });
 
 
-// WITHDRAW FRIENDSHIP REQUEST
-router.post('/withdraw', (req, res) => {
-    const { responder_id } = req.body; 
-    const requester_id = req.session.userID; 
-
-    // Delete the pending friend request
-    const query = `
-        DELETE FROM friendship
-        WHERE requester_id = ? AND responder_id = ? AND status = 'Pending'
-    `;
-
-    db.run(query, [requester_id, responder_id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ error: 'No pending request found.' });
-
-        res.json({ message: 'Friend request withdrawn.' });
-    });
-});
-
-
-// ACCEPTS FRIEND REQUEST
+// ACCEPT FRIEND REQUEST
 router.post('/accept', (req, res) => {
     const { requester_id } = req.body; 
-    const responder_id = req.session.userID; 
+    const responder_id = req.user.userId; 
 
     console.log('Requester ID:', requester_id);
     console.log('Responder ID:', responder_id);
@@ -144,7 +79,7 @@ router.post('/accept', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(404).json({ error: 'No pending request found.' });
 
-        res.json({ message: 'Friend request accepted and you are friends now.' });
+        res.status(200).json({ message: 'Friend request accepted and you are friends now.' });
     });
 });
 
@@ -152,12 +87,12 @@ router.post('/accept', (req, res) => {
 // REJECT FRIEND REQUEST
 router.post('/reject', (req, res) => {
     const { requester_id } = req.body; 
-    const responder_id = req.session.userID; 
+    const responder_id = req.user.userId; 
 
     console.log('Requester ID:', requester_id);
     console.log('Responder ID:', responder_id);
 
-    // Update status to 'rejected'
+    // Update status to 'Rejected'
     const query = `
         UPDATE friendship
         SET status = 'Rejected'
@@ -168,7 +103,7 @@ router.post('/reject', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(404).json({ error: 'No pending request found.' });
 
-        res.json({ message: 'Friend request rejected.' });
+        res.status(200).json({ message: 'Friend request rejected.' });
     });
 });
 
@@ -176,7 +111,7 @@ router.post('/reject', (req, res) => {
 // BREAK FRIENDSHIP
 router.post('/break', (req, res) => {
     const { friend_id } = req.body; 
-    const user_id = req.session.userID;
+    const user_id = req.user.userId;
 
     // Delete the friendship record
     const query = `
@@ -188,8 +123,126 @@ router.post('/break', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(404).json({ error: 'No friendship found.' });
 
-        res.json({ message: 'Not friends anymore.' });
+        return res.status(204).send();
     });
 });
+
+
+// RETRIEVE FRIEND AVATAR
+router.get('/friend/avatar', (req, res) => {
+    const { user_id } = req.query;
+
+    if (!user_id) return res.status(400).json({ error: 'User ID is required' });
+
+    const avatarPath = path.join(__dirname, `../user_uploads/${user_id}.png`);
+    if (fs.existsSync(avatarPath)) {
+        res.status(200).json({ avatarUrl: `/user_uploads/${user_id}.png` });
+    } else {
+        res.status(200).json({ avatarUrl: '/user_uploads/default.png' });
+    }
+});
+
+
+// RETRIEVE CONFIRMED & PENDING FRIEND LIST
+router.get('/list', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { page = 1, limit = 10, search = '', sort = 'first_name' } = req.query;
+        const offset = (page - 1) * limit;
+
+        // Only allow certain columns for sorting to prevent SQL injection
+        const allowedSortFields = ['first_name', 'last_name'];
+        const sortField = allowedSortFields.includes(sort) ? sort : 'first_name';
+
+        // Count total records that match the search term
+        const countPendingQuery = `
+            SELECT COUNT(*) AS count 
+            FROM friendship 
+            INNER JOIN user_registration 
+            ON friendship.requester_id = user_registration.user_id
+            WHERE responder_id = ? AND status = 'Pending'
+            AND (first_name LIKE ? OR last_name LIKE ?)
+        `;
+        
+        const countFriendsQuery = `
+            SELECT COUNT(*) AS count 
+            FROM friendship 
+            INNER JOIN user_registration 
+            ON (user_registration.user_id = requester_id AND responder_id = ?) 
+                OR (user_registration.user_id = responder_id AND requester_id = ?)
+            WHERE status = 'Accepted'
+            AND (first_name LIKE ? OR last_name LIKE ?)
+        `;
+
+        // Data retrieval queries with pagination
+        const pendingQuery = `
+            SELECT friendship_id, requester_id, responder_id, first_name, last_name, 'Pending' AS status
+            FROM friendship 
+            INNER JOIN user_registration ON friendship.requester_id = user_registration.user_id
+            WHERE responder_id = ? AND status = 'Pending'
+            AND (first_name LIKE ? OR last_name LIKE ?)
+            ORDER BY ${sortField}                              
+            LIMIT ? OFFSET ?                              
+        `;
+
+        const friendsQuery = `
+            SELECT 
+                CASE 
+                    WHEN requester_id = ? THEN responder_id
+                    ELSE requester_id 
+                END AS friend_id, 
+                first_name, last_name, 'Accepted' AS status
+            FROM friendship 
+            INNER JOIN user_registration 
+            ON (user_registration.user_id = requester_id AND responder_id = ?) 
+                OR (user_registration.user_id = responder_id AND requester_id = ?)
+            WHERE status = 'Accepted'
+            AND (first_name LIKE ? OR last_name LIKE ?)
+            ORDER BY ${sortField}
+            LIMIT ? OFFSET ?
+        `;
+
+        // Get total record count for filtered results
+        const pendingCountResult = await new Promise((resolve, reject) => {
+            db.get(countPendingQuery, [userId, `%${search}%`, `%${search}%`], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+
+        const friendsCountResult = await new Promise((resolve, reject) => {
+            db.get(countFriendsQuery, [userId, userId, `%${search}%`, `%${search}%`], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+
+        // Get paginated data for current page
+        const pendingRequests = await new Promise((resolve, reject) => {
+            db.all(pendingQuery, [userId, `%${search}%`, `%${search}%`, limit, offset], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+
+        const friends = await new Promise((resolve, reject) => {
+            db.all(friendsQuery, [userId, userId, userId, `%${search}%`, `%${search}%`, limit, offset], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+
+        // Calculate total pages based on the filtered counts
+        res.status(200).json({
+            pendingRequests,
+            friends,
+            pendingTotalPages: Math.ceil(pendingCountResult.count / limit),
+            friendTotalPages: Math.ceil(friendsCountResult.count / limit),
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 module.exports = router;
