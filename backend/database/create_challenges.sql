@@ -1,7 +1,6 @@
  CREATE TABLE avail_challenges (
     challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
     challenge_type VARCHAR(50) NOT NULL,
-    challenge_name VARCHAR(256) NOT NULL,
     challenge_deadline DATE DEFAULT(CURRENT_DATE),
     activity_id INTEGER NOT NULL,
     participants_num INTEGER NOT NULL,
