@@ -2,10 +2,24 @@ const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
 const jwt = require('jsonwebtoken'); 
 
 const authenticateToken = require('../authenticateToken'); // Import the middleware
 const secretKey = 'super_secret_key_for_TIC2601!'; 
+
+const upload = multer({
+    dest: path.join(__dirname, '../user_uploads/'), //  Destination folder to store user photo
+    limits: { fileSize: 5 * 1024 * 1024 },  // 5 MB
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only .png files are allowed!'), false);
+        }
+    },
+});
 
 const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) => {
     if (err) {
@@ -59,8 +73,12 @@ router.post('/auth', (req, res) => {
         if (!user || user.password !== password) return res.status(401).json({ error: 'Invalid email or password.' });
 
         // Create JWT token
-        const token = jwt.sign({ userId: user.user_id, email: user.email }, secretKey, { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful!', accessToken: token });
+        const token = jwt.sign({ userId: user.user_id, email: user.email }, secretKey, { expiresIn: '2h' });
+        res.status(200).json({ 
+            message: 'Login successful!', 
+            accessToken: token, 
+            user_id: user.user_id //
+        });
     });
 });
 
@@ -180,6 +198,25 @@ router.put('/update-password', authenticateToken, (req, res) => {
     db.run(query, [newPassword, req.user.userId], function (err) {
         if (err) return res.status(500).json({ error: 'An error occurred while updating the password' });
         res.status(200).json({ message: 'Password updated successfully' });
+    });
+});
+
+
+// PROFILE PHOTO UPLOAD ROUTE
+router.post('/upload-avatar', authenticateToken, upload.single('avatar'), (req, res) => {
+    const userId = req.user.userId;
+    const tempPath = req.file.path;
+    const targetPath = path.join(__dirname, `../user_uploads/${userId}.png`);
+
+    if (fs.existsSync(targetPath)) {
+        fs.unlinkSync(targetPath);
+    }
+
+    fs.rename(tempPath, targetPath, (err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error processing file upload.' });
+        }
+        res.status(200).json({ message: 'Profile photo uploaded successfully.' });
     });
 });
 
