@@ -12,14 +12,14 @@
 .title {
   font-size: 28px;
   white-space: nowrap;
-  color: black; /* Changing color to black */
-  margin-bottom: 10px; /* Adjust spacing below the title as needed */
+  color: black; 
+  margin-bottom: 10px; 
 }
 
 /* Header and search area styles */
 .header-container {
   display: flex;
-  justify-content: space-between; /* Distributes space between and around items */
+  justify-content: space-between; 
   align-items: center;
   margin-top: 50px;
 }
@@ -38,22 +38,22 @@
 }
 
 .refresh-button {
-  margin-left: 15px; /* Adds spacing between search bar and button */
+  margin-left: 15px; 
 }
 
 /* Table styling with borders */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse; 
   margin-top: 20px;
   background-color: #fff;
+  border: 1px solid #ddd; 
 }
 
 th, td {
+  border: 1px solid #ddd; 
+  padding: 8px; 
   text-align: left;
-  padding: 12px;
-  border: 1px solid #ddd; /* Adds border to each cell */
 }
 
 th {
@@ -64,7 +64,7 @@ th {
 
 /* Makes table more defined */
 .table-bordered {
-  border: 2px solid #007bff; /* Adds border around the table */
+  border: 2px solid #007bff; 
 }
 
 @media (max-width: 768px) {
@@ -82,7 +82,7 @@ th {
   }
 
   .refresh-button {
-    margin-top: 10px; /* Adds space between the search bar and the button on small screens */
+    margin-top: 10px; 
   }
 
   table, th, td {
