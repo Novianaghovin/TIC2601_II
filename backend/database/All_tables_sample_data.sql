@@ -228,14 +228,16 @@ INSERT INTO activity_log (activity_duration, distance, step_count, calories_burn
 (30, 5.00, 3000, 150.00, 4, 4); 
 
 INSERT INTO badge_type (badge_id, badge_name) VALUES
-(1, 'Oct 2023 5km Run Challenge'),
-(2, 'Nov 2023 10km Run Challenge'),
-(3, 'Dec 2023 15km Run Challenge ');
+(1, 'Oct 2024 5km Run Challenge'),
+(2, 'Nov 2024 10km Run Challenge'),
+(3, 'Dec 2024 15km Run Challenge '),
+(4, 'Jan 2024 5km Walk Challenge ');
 
 INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status , badge_id, distance) VALUES
-('Running',  '2023-10-31', 1, 50, 'Active', 1, 5),
-('Running',  '2023-11-31', 2, 50, 'Active', 2, 10),
-('Running',  '2023-12-31', 3, 50, 'Active', 3, 15);
+('Running',  '2024-10-11', 1, 50, 'Active', 1, 5),
+('Running',  '2024-11-11', 2, 50, 'Active', 2, 10),
+('Running',  '2024-12-11', 3, 50, 'Active', 3, 15),
+('Walking',  '2024-01-01', 3, 50, 'Active', 4, 5);
 
 INSERT INTO user_challenges (user_id, challenge_id,activity_id, status, progress) VALUES
 (1, 1, 1, 'Active', 0.00),

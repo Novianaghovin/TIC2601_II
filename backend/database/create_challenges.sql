@@ -18,7 +18,7 @@ CREATE TABLE user_challenges (
     challenge_id INTEGER NOT NULL,
     activity_id INTEGER NOT NULL,
     status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Completed')),
-    progress DECIMAL(5,2),
+    progress DECIMAL(5,2) DEFAULT 0,
     joined_at DATE DEFAULT(CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON UPDATE CASCADE,
     FOREIGN KEY (challenge_id) REFERENCES avail_challenges(challenge_id) ON UPDATE CASCADE,
@@ -31,7 +31,3 @@ INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, p
 ('Running',  '2023-12-31', 3, 50, 'Active', 3, 15),
 ('Walking',  '2024-01-01', 4, 50, 'Active', 4, 5);
 
-INSERT INTO user_challenges (user_id, challenge_id,activity_id, status, progress) VALUES
-(1, 1, 1, 'Active', 0.00),
-(2, 2, 2, 'Active', 0.00),
-(3, 3, 3, 'Active', 0.00);
