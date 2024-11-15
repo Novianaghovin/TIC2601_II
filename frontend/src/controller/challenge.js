@@ -157,10 +157,18 @@ const Challenges = () => {
       .catch(error => console.error('Error fetching available challenges:', error));
   };
 
+  function disableJoinButton(challengeID) {
+    const button = document.getElementById(`joinButton${challengeID}`);
+    if (button) {
+      button.disabled = true;
+      button.classList.add('button-disabled');
+    }
+  }
+  
   const joinChallenge = (activityID, challengeID) => {
     console.log('Join button clicked for challenge ID:', challengeID);
     console.log('Join button clicked for Activity ID:', activityID);
-
+  
     if (!userId) {
       console.error('Error: User ID not available');
       return;
@@ -180,6 +188,7 @@ const Challenges = () => {
         if (data.success) {
           // Update available and my challenges after joining
           fetchMyChallenges(userId);
+          disableJoinButton(challengeID); // Disable the join button
           alert(`Successfully joined the challenge!`);
         } else {
           alert(data.message); // Display message if there's any error
@@ -187,6 +196,7 @@ const Challenges = () => {
       })
       .catch(error => console.error('Error joining challenge:', error));
   };
+  
 
   const refreshProgress = () => {
     fetch(`http://localhost:3001/api/refresh-progress/${userId}`, { 
@@ -230,6 +240,11 @@ const Challenges = () => {
     );
 
     setFilteredChallenges(filtered);
+  };
+
+  // Utility function to determine if a challenge is joined
+  const isChallengeJoined = (challengeID) => {
+    return challenges.some(challenge => challenge.challenge_id === challengeID);
   };
   
   
@@ -328,7 +343,10 @@ const Challenges = () => {
                 <td>{challenge.badge_id}</td>
                 <td>{challenge.status || 'Active'}</td>
                 <td>
-                <button onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}>Join</button>
+                <button
+                  onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}
+                  disabled={isChallengeJoined(challenge.challenge_id)}
+                  className={isChallengeJoined(challenge.challenge_id) ? 'button-disabled' : ''}>Join</button>
                 </td>
               </tr>
             ))

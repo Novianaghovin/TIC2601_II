@@ -99,9 +99,9 @@ app.get('/api/my-challenges/:userId', (req, res) => {
 app.post('/api/refresh-progress/:userId', (req, res) => {
     const userId = req.params.userId; 
 
-    // Fetch all challenges for the user along with their distances
+    // Fetch all challenges for the user along with their distances and deadline
     const fetchChallengesQuery = `
-    SELECT uc.challenge_id, uc.user_id, ac.distance
+    SELECT uc.challenge_id, uc.user_id, ac.distance, ac.challenge_deadline
     FROM user_challenges AS uc
     JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
     WHERE uc.user_id = ?`;
@@ -114,12 +114,16 @@ app.post('/api/refresh-progress/:userId', (req, res) => {
 
         // Iterate over each challenge and calculate progress
         challenges.forEach(challenge => {   
-            const { user_id, distance, challenge_id} = challenge;
+            const { user_id, distance, challenge_id, challenge_deadline} = challenge;
 
             // Calculate total distance for this challenge
-            const totalDistanceQuery = `SELECT SUM(distance) AS totalDistance FROM activity_log WHERE user_id = ?`;
+            const totalDistanceQuery = 
+            `SELECT SUM(al.distance) AS totalDistance 
+             FROM activity_log AS al
+             JOIN user_challenges AS uc ON al.log_id = uc.activity_id
+             WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= uc.joined_at`;
 
-            db.get(totalDistanceQuery, [user_id], (err, row) => {
+            db.get(totalDistanceQuery, [user_id, challenge_deadline], (err, row) => {
                 if (err) {
                     console.error('Error calculating total distance:', err.message);
                     return;

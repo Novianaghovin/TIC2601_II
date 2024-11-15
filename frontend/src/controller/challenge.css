@@ -93,8 +93,16 @@ button {
   transition: background-color 0.3s ease;
 }
 
+/* Style for buttons when hovered */
 button:hover {
   background-color: #0056b3;
+}
+
+/* Style for disabled buttons */
+button:disabled {
+  background-color: #ccc; /* Grey background */
+  color: #666; /* Dark grey text */
+  cursor: not-allowed; /* Cursor indicates button is disabled */
 }
 
 /* Styling links as buttons */
