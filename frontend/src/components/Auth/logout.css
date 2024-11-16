@@ -1,0 +1,45 @@
+.logout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .logout-popup {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .logout-popup h2 {
+    font-size: 30px;
+    font-weight: 400;
+  }
+
+  .button-group button {
+    margin: 15px;
+    padding: 10px 20px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  
+  .button-group button:first-child {
+    background-color: #FF4B2B;
+    color: white;
+    border: none;
+  }
+  
+  .button-group button:last-child {
+    background-color: #f0f0f0;
+    color: black;
+    border: none;
+  }
+  

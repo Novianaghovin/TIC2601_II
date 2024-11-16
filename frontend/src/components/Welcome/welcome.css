@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+
+
+.welcome-body {
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  height: 100vh;
+  margin: 0;
+}
+
+.welcome-container {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  width: 100vw;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.nav-links {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  display: flex;
+  gap: 30px;
+  font-size: 1.1rem;
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.greeting {
+  text-align: center;
+  color: white;
+  font-weight: 400;
+}
+
+.greeting h1 {
+  font-size: 12rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.greeting h2 {
+  font-size: 4rem;
+  margin-top: 10px;
+  font-weight: 400; 
+}
+
+.motivational-message {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 1.5rem;
+  color: white;
+  width: fit-content;
+  font-weight: 400;
+}
