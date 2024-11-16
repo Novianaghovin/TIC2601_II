@@ -115,16 +115,36 @@ router.post('/api/refresh-progress/:userId', (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
         }
 
+        // Get current date for expired check
+        const currentDate = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
         // Iterate over each challenge and calculate progress
         challenges.forEach(challenge => {   
-            const { user_id, distance, challenge_id, challenge_deadline} = challenge;
+            const { user_id, distance, challenge_id, challenge_deadline } = challenge;
+
+            // Check if the challenge is expired
+            let status = 'Active'; // Default status
+            if (challenge_deadline < currentDate) {
+                status = 'Expired'; // Set status to Expired if the deadline has passed
+            }
+
+            if (status === 'Expired') {
+                // Update the user's status to 'Expired' and skip progress calculation
+                db.run(`UPDATE user_challenges SET status = ? WHERE user_id = ? AND challenge_id = ?`, 
+                    ['Expired', user_id, challenge_id], function(err) {
+                    if (err) {
+                        console.error('Error updating status to Expired:', err.message);
+                    }
+                });
+                return; // Skip further processing for expired challenges
+            }
 
             // Calculate total distance for this challenge
-            const totalDistanceQuery = 
-            `SELECT SUM(al.distance) AS totalDistance 
-             FROM activity_log AS al
-             JOIN user_challenges AS uc ON al.log_id = uc.activity_id
-             WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= uc.joined_at`;
+            const totalDistanceQuery = `
+            SELECT SUM(al.distance) AS totalDistance 
+            FROM activity_log AS al
+            JOIN user_challenges AS uc ON al.log_id = uc.activity_id
+            WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= uc.joined_at`;
 
             db.get(totalDistanceQuery, [user_id, challenge_deadline], (err, row) => {
                 if (err) {
@@ -139,7 +159,6 @@ router.post('/api/refresh-progress/:userId', (req, res) => {
                 if (progress >= 100) {
                     progress = 100; // Cap progress at 100%
                 }
-                const status = progress >= 100 ? 'Completed' : 'Active';
 
                 // Update the user's progress and status in the user_challenges table
                 db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
@@ -150,10 +169,10 @@ router.post('/api/refresh-progress/:userId', (req, res) => {
                 });
             });
         });
-    });
 
-    // Send a response back once all updates are complete
-    res.json({ success: true, message: 'Progress has been updated for all challenges.' });
+        // Send a success response
+        res.json({ success: true, message: 'Challenge progress updated successfully.' });
+    });
 });
 
 
