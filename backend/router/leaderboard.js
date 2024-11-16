@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const app = express();
@@ -15,7 +16,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-app.get('/api/leaderboard/:challengeID', (req, res) => {
+router.get('/api/leaderboard/:challengeID', (req, res) => {
     const challengeID = req.params.challengeID;
 
     // SQL query to fetch the leaderboard of the specific challenge ID
