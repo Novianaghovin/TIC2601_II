@@ -1,20 +1,8 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const cors = require('cors');
-const leaderboardroute = require('./leaderboard');
 const app = express();
 const router = express.Router();
-const port = 3001;
-
-/* Middleware */ 
-app.use(cors());
-app.use(express.json());
-
-router.use('/leaderboard', leaderboardroute);
-
-// Use the router for all app routes
-app.use('/', router);
 
 // Define the path to the existing database file
 const DB_PATH = path.resolve(__dirname, '../database/database.db');
@@ -75,8 +63,6 @@ router.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) =
         );
     });
 });
-
-  
 
 // Route to fetch "My Challenges" (challenges the user has joined)
 router.get('/api/my-challenges/:userId', (req, res) => {
@@ -175,8 +161,6 @@ router.post('/api/refresh-progress/:userId', (req, res) => {
     });
 });
 
-
-
 // Route to fetch activity id from the database
 router.get('/api/get-activity/:activityID', (req, res) => {
     const activityId = req.params.activityID;
@@ -257,11 +241,6 @@ router.get('/api/get-user/:userID', (req, res) => {
             res.status(404).json({ message: 'User not found' });
         }
     });
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
 });
 
 module.exports = router;
