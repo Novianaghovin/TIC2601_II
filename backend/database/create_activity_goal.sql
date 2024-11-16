@@ -38,55 +38,6 @@ CREATE TABLE goals (
         ON UPDATE CASCADE
 );
 
--- Trigger to auto-calculate progress when a new goal is inserted
-CREATE TRIGGER calculate_goal_progress_after_insert
-AFTER INSERT ON goals
-BEGIN
-    UPDATE goals
-    SET progress = (
-        SELECT MIN(100, SUM(al.distance) * 100.0 / NEW.target_distance)
-        FROM activity_log al
-        WHERE al.user_id = NEW.user_id 
-          AND al.activity_id = NEW.activity_id
-          AND al.timestamp >= NEW.created_date
-          AND al.timestamp <= NEW.goal_deadline
-    )
-    WHERE goal_id = NEW.goal_id;
-END;
-
--- Trigger to auto-calculate progress when a goal is updated
-CREATE TRIGGER calculate_goal_progress_after_update
-AFTER UPDATE ON goals
-BEGIN
-    UPDATE goals
-    SET progress = (
-        SELECT MIN(100, SUM(al.distance) * 100.0 / NEW.target_distance)
-        FROM activity_log al
-        WHERE al.user_id = NEW.user_id 
-          AND al.activity_id = NEW.activity_id
-          AND al.timestamp >= NEW.created_date
-          AND al.timestamp <= NEW.goal_deadline
-    )
-    WHERE goal_id = NEW.goal_id;
-END;
-
--- Trigger to auto-calculate progress in the 'goals' table when a new activity log is inserted
-CREATE TRIGGER update_goal_progress_on_log
-AFTER INSERT ON activity_log
-BEGIN
-    UPDATE goals
-    SET progress = (
-        SELECT MIN(100, SUM(al.distance) * 100.0 / goals.target_distance)
-        FROM activity_log al
-        WHERE al.user_id = goals.user_id 
-          AND al.activity_id = goals.activity_id
-          AND al.timestamp >= goals.created_date
-          AND al.timestamp <= goals.goal_deadline
-    )
-    WHERE goals.user_id = NEW.user_id 
-      AND goals.activity_id = NEW.activity_id;
-END;
-
 
 --insert sample data
 INSERT INTO activity_type (activity_name, activity_multiplier) VALUES 

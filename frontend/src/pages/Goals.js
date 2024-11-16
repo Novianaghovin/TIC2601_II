@@ -27,6 +27,7 @@ function Goals() {
             setGoals(response.data);
         } catch (error) {
             console.error("Error fetching goals:", error);
+            setGoals([]); // Set an empty list if there's an error
         }
     };
 
@@ -44,24 +45,31 @@ function Goals() {
             const userId = 1; // Hardcoded user ID for testing
             const formattedData = {
                 ...formData,
-                goal_deadline: formData.goal_deadline.toISOString()
+                goal_deadline: formData.goal_deadline instanceof Date ? formData.goal_deadline.toISOString() : formData.goal_deadline
             };
 
             if (editingGoalId) {
+                // Update an existing goal
                 await axios.put(`http://localhost:3000/api/goals/${editingGoalId}`, { ...formattedData, user_id: userId });
                 alert('Goal updated successfully!');
             } else {
+                // Create a new goal
                 await axios.post('http://localhost:3000/api/goals', { ...formattedData, user_id: userId });
                 alert('Goal created successfully!');
             }
             fetchGoals(userId);
             clearForm();
         } catch (error) {
-            alert('Error setting goal');
-            console.error("Error:", error);
+            if (error.response) {
+                console.error("Error response:", error.response.data);
+                alert(`Error setting goal: ${error.response.data.error}`);
+            } else {
+                console.error("Error:", error);
+                alert('Error setting goal. Please check console for details.');
+            }
         }
     };
-    
+
     const loadGoalForEdit = (goal) => {
         setFormData({
             goal_name: goal.goal_name,
@@ -160,10 +168,9 @@ function Goals() {
                         goals.map((goal) => (
                             <tr key={goal.goal_id}>
                                 <td>{goal.goal_name}</td>
-                                <td>{new Date(goal.goal_deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{" "}
-                                    {new Date(goal.goal_deadline).toLocaleDateString('en-GB')}</td>
+                                <td>{new Date(goal.goal_deadline).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
                                 <td>{goal.target_distance}</td>
-                                <td>{goal.progress !== null ? goal.progress.toFixed(2) : '0.00'}%</td>
+                                <td>{goal.progress ? parseFloat(goal.progress).toFixed(2) : '0.00'}%</td>
                                 <td>{goal.activity_name}</td>
                                 <td>
                                     <button onClick={() => loadGoalForEdit(goal)}>Edit</button>

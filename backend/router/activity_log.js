@@ -3,11 +3,62 @@ const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
 const db = new sqlite3.Database('./database/database.db');
 
-// Example route for testing
-router.get('/', (req, res) => {
-    res.send('Activity log route is working!');
-});
+// Helper function to recalculate goal progress
+const recalculateProgressForGoals = (userId, activityId, callback) => {
+    const sql = `
+        SELECT goal_id
+        FROM goals
+        WHERE user_id = ? AND activity_id = ?
+    `;
+    db.all(sql, [userId, activityId], (err, goals) => {
+        if (err) {
+            return callback(err);
+        }
 
+        if (!goals || goals.length === 0) {
+            return callback(null); // No associated goals to update
+        }
+
+        const progressUpdates = goals.map((goal) => {
+            return new Promise((resolve, reject) => {
+                const sqlRecalculate = `
+                    SELECT 
+                        g.target_distance, 
+                        g.created_date, 
+                        g.goal_deadline, 
+                        IFNULL(SUM(al.distance), 0) AS total_distance
+                    FROM goals g
+                    LEFT JOIN activity_log al 
+                        ON g.user_id = al.user_id 
+                        AND g.activity_id = al.activity_id 
+                        AND al.timestamp >= g.created_date 
+                        AND al.timestamp <= g.goal_deadline
+                    WHERE g.goal_id = ?
+                    GROUP BY g.goal_id
+                `;
+                db.get(sqlRecalculate, [goal.goal_id], (err, row) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        const progress = Math.min(100, (row.total_distance / row.target_distance) * 100).toFixed(2);
+                        const sqlUpdate = `UPDATE goals SET progress = ? WHERE goal_id = ?`;
+                        db.run(sqlUpdate, [progress, goal.goal_id], (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        Promise.all(progressUpdates)
+            .then(() => callback(null))
+            .catch((err) => callback(err));
+    });
+};
 
 // Get all activity logs by user ID (User can only view their own activities)
 router.get('/user/:user_id', (req, res) => {
@@ -77,28 +128,36 @@ router.post('/', (req, res) => {
                 return res.status(500).send('Internal Server Error: ' + err.message);
             }
 
-            // Retrieve the newly inserted log entry to send back as response
-            const newLogId = this.lastID;
-            const sqlSelectNewLog = `
-                SELECT 
-                    activity_log.log_id, 
-                    activity_type.activity_name, 
-                    activity_log.activity_duration, 
-                    activity_log.distance, 
-                    activity_log.step_count, 
-                    activity_log.calories_burnt, 
-                    activity_log.timestamp
-                FROM activity_log
-                JOIN activity_type ON activity_log.activity_id = activity_type.activity_id
-                WHERE activity_log.log_id = ?
-            `;
-            db.get(sqlSelectNewLog, [newLogId], (err, newLog) => {
+            // Recalculate progress for associated goals
+            const activityId = this.lastID;
+            recalculateProgressForGoals(user_id, activityId, (err) => {
                 if (err) {
-                    console.error('Error retrieving new activity log:', err);
-                    return res.status(500).send('Internal Server Error: ' + err.message);
+                    console.error('Error recalculating progress:', err);
+                    return res.status(500).send('Error recalculating progress: ' + err.message);
                 }
 
-                res.status(201).json(newLog);  // Return the newly created entry as JSON
+                // Retrieve the newly inserted log entry to send back as response
+                const sqlSelectNewLog = `
+                    SELECT 
+                        activity_log.log_id, 
+                        activity_type.activity_name, 
+                        activity_log.activity_duration, 
+                        activity_log.distance, 
+                        activity_log.step_count, 
+                        activity_log.calories_burnt, 
+                        activity_log.timestamp
+                    FROM activity_log
+                    JOIN activity_type ON activity_log.activity_id = activity_type.activity_id
+                    WHERE activity_log.log_id = ?
+                `;
+                db.get(sqlSelectNewLog, [activityId], (err, newLog) => {
+                    if (err) {
+                        console.error('Error retrieving new activity log:', err);
+                        return res.status(500).send('Internal Server Error: ' + err.message);
+                    }
+
+                    res.status(201).json(newLog); // Return the newly created entry as JSON
+                });
             });
         });
     });
