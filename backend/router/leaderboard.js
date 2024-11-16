@@ -15,7 +15,6 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     }
 });
 
-
 app.get('/api/leaderboard/:challengeID', (req, res) => {
     const challengeID = req.params.challengeID;
 
