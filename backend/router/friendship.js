@@ -17,7 +17,7 @@ console.log('Friend route loaded');
 router.use(authenticateToken);
 
 // SEARCH FOR USER BY EMAIL TO SEND FRIEND REQUEST
-router.get('/search', (req, res) => {
+router.get('/search', authenticateToken, (req, res) => {
     const { email } = req.query;
     if (!email) return res.status(400).json({ error: 'A valid email is required.' });
 
@@ -31,7 +31,7 @@ router.get('/search', (req, res) => {
 
 
 // SEND FRIENDSHIP REQUEST
-router.post('/request', (req, res) => {
+router.post('/request', authenticateToken, (req, res) => {
     const responder_id = String(req.body.responder_id);
     const requester_id = String(req.user.userId);
     if (!responder_id || requester_id === responder_id) return res.status(400).json({ error: 'Invalid friend request.' });
@@ -61,7 +61,7 @@ router.post('/request', (req, res) => {
 
 
 // ACCEPT FRIEND REQUEST
-router.post('/accept', (req, res) => {
+router.post('/accept', authenticateToken, (req, res) => {
     const { requester_id } = req.body; 
     const responder_id = req.user.userId; 
 
@@ -85,7 +85,7 @@ router.post('/accept', (req, res) => {
 
 
 // REJECT FRIEND REQUEST
-router.post('/reject', (req, res) => {
+router.post('/reject', authenticateToken, (req, res) => {
     const { requester_id } = req.body; 
     const responder_id = req.user.userId; 
 
@@ -109,7 +109,7 @@ router.post('/reject', (req, res) => {
 
 
 // BREAK FRIENDSHIP
-router.post('/break', (req, res) => {
+router.post('/break', authenticateToken, (req, res) => {
     const { friend_id } = req.body; 
     const user_id = req.user.userId;
 
@@ -144,7 +144,7 @@ router.get('/friend/avatar', (req, res) => {
 
 
 // RETRIEVE CONFIRMED & PENDING FRIEND LIST
-router.get('/list', async (req, res) => {
+router.get('/list', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
         const { page = 1, limit = 10, search = '', sort = 'first_name' } = req.query;
