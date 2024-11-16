@@ -15,10 +15,12 @@ app.use('/user_uploads', express.static(path.join(__dirname, 'user_uploads')));
 const user = require('./router/user');
 const friend = require('./router/friend');
 const badgeRouter = require('./router/badge');
+const challengesRouter = require('./router/challenges');
 
 app.use('/user', user);
 app.use('/friend', friend);
 app.use(badgeRouter); -- /badge alrd exist in the file not require to input
+app.use(challengesRouter);
 
 const port = 3001;
 app.listen(port, () => {
