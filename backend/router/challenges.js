@@ -84,7 +84,7 @@ router.get('/api/my-challenges/:userId', (req, res) => {
     });
 });
 
-// Route to refresh progress for all user challenges
+// Route to refresh all user challenges
 router.post('/api/refresh-progress/:userId', (req, res) => {
     const userId = req.params.userId; 
 
