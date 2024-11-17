@@ -11,19 +11,22 @@ function Goals() {
         goal_name: '',
         goal_deadline: new Date(),
         target_distance: '',
-        activity_id: '',
-        user_id: ''
+        activity_id: ''
     });
     const [editingGoalId, setEditingGoalId] = useState(null);
 
     useEffect(() => {
-        const userId = 1; // Hardcoded user ID for testing
-        fetchGoals(userId);
+        fetchGoals();
     }, []);
 
-    const fetchGoals = async (userId) => {
+    const fetchGoals = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/api/goals?user_id=${userId}`);
+            const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
+            const response = await axios.get('http://localhost:3000/api/goals', {
+                headers: {
+                    Authorization: `Bearer ${token}` // Include token in Authorization header
+                }
+            });
             setGoals(response.data);
         } catch (error) {
             console.error("Error fetching goals:", error);
@@ -42,7 +45,7 @@ function Goals() {
 
     const createOrUpdateGoal = async () => {
         try {
-            const userId = 1; // Hardcoded user ID for testing
+            const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
             const formattedData = {
                 ...formData,
                 goal_deadline: formData.goal_deadline instanceof Date ? formData.goal_deadline.toISOString() : formData.goal_deadline
@@ -50,14 +53,22 @@ function Goals() {
 
             if (editingGoalId) {
                 // Update an existing goal
-                await axios.put(`http://localhost:3000/api/goals/${editingGoalId}`, { ...formattedData, user_id: userId });
+                await axios.put(`http://localhost:3000/api/goals/${editingGoalId}`, formattedData, {
+                    headers: {
+                        Authorization: `Bearer ${token}` // Include token in Authorization header
+                    }
+                });
                 alert('Goal updated successfully!');
             } else {
                 // Create a new goal
-                await axios.post('http://localhost:3000/api/goals', { ...formattedData, user_id: userId });
+                await axios.post('http://localhost:3000/api/goals', formattedData, {
+                    headers: {
+                        Authorization: `Bearer ${token}` // Include token in Authorization header
+                    }
+                });
                 alert('Goal created successfully!');
             }
-            fetchGoals(userId);
+            fetchGoals();
             clearForm();
         } catch (error) {
             if (error.response) {
@@ -75,8 +86,7 @@ function Goals() {
             goal_name: goal.goal_name,
             goal_deadline: new Date(goal.goal_deadline),
             target_distance: goal.target_distance,
-            activity_id: goal.activity_id,
-            user_id: goal.user_id
+            activity_id: goal.activity_id
         });
         setEditingGoalId(goal.goal_id);
     };
@@ -91,16 +101,20 @@ function Goals() {
             goal_name: '',
             goal_deadline: new Date(),
             target_distance: '',
-            activity_id: '',
-            user_id: ''
+            activity_id: ''
         });
     };
 
-    const deleteGoal = async (goalId, userId) => {
+    const deleteGoal = async (goalId) => {
         try {
-            await axios.delete(`http://localhost:3000/api/goals/${goalId}?user_id=${userId}`);
+            const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
+            await axios.delete(`http://localhost:3000/api/goals/${goalId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}` // Include token in Authorization header
+                }
+            });
             alert('Goal deleted successfully!');
-            fetchGoals(userId);
+            fetchGoals();
         } catch (error) {
             alert('Error deleting goal');
             console.error("Error:", error);
@@ -132,15 +146,6 @@ function Goals() {
                     <option value="3">Cycle</option>
                     <option value="4">Walk</option>
                 </select>
-
-                <input
-                    type="number"
-                    name="user_id"
-                    placeholder="User ID"
-                    value={formData.user_id}
-                    onChange={handleInputChange}
-                    required
-                />
                 
                 <button type="button" onClick={createOrUpdateGoal}>
                     {editingGoalId ? 'Update Goal' : 'Set Goal'}
@@ -174,7 +179,7 @@ function Goals() {
                                 <td>{goal.activity_name}</td>
                                 <td>
                                     <button onClick={() => loadGoalForEdit(goal)}>Edit</button>
-                                    <button onClick={() => deleteGoal(goal.goal_id, goal.user_id)}>Delete</button>
+                                    <button onClick={() => deleteGoal(goal.goal_id)}>Delete</button>
                                 </td>
                             </tr>
                         ))

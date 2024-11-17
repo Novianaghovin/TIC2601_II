@@ -73,9 +73,9 @@ const recalculateProgressForGoals = (userId, activityId, callback) => {
     });
 };
 
-// Get all activity logs for a user
-router.get('/user/:user_id', authenticateToken, (req, res) => {
-    const userId = req.params.user_id;
+// Get all activity logs for the logged-in user
+router.get('/', authenticateToken, (req, res) => {
+    const userId = req.user.userId; // Extract user ID from token
     const sql = `
         SELECT 
             activity_log.log_id, 

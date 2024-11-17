@@ -4,7 +4,6 @@ import InputActivityType from '../components/InputActivityType';
 import InputActivityDuration from '../components/InputActivityDuration';
 import InputDistance from '../components/InputDistance';
 import InputStepCount from '../components/InputStepCount';
-import InputUserId from '../components/InputUserId';
 
 function ActivityLog() {
     const [activities, setActivities] = useState([]);
@@ -12,25 +11,28 @@ function ActivityLog() {
         activity_name: '',
         activity_duration: '',
         distance: '',
-        step_count: '',
-        user_id: ''
+        step_count: ''
     });
     const [editingLogId, setEditingLogId] = useState(null);
-    
+
     useEffect(() => {
-        const userId = 1; // Hardcoded user ID for testing
-        fetchActivityLogs(userId);
+        fetchActivityLogs();
     }, []);
 
-    const fetchActivityLogs = async (userId) => {
+    const fetchActivityLogs = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/api/activity_log/user/${userId}`);
+            const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
+            const response = await axios.get('http://localhost:3000/api/activity_log', {
+                headers: {
+                    Authorization: `Bearer ${token}` // Pass token in the Authorization header
+                }
+            });
             setActivities(response.data);
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 setActivities([]); // Set an empty array if no logs found
             } else {
-                console.error("Error fetching activity logs:", error);
+                console.error('Error fetching activity logs:', error);
             }
         }
     };
@@ -42,26 +44,19 @@ function ActivityLog() {
 
     const saveLog = async () => {
         try {
-            const userId = 1; // Hardcoded user ID for testing
-            await axios.post('http://localhost:3000/api/activity_log', { ...formData, user_id: userId });
+            const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
+            await axios.post('http://localhost:3000/api/activity_log', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}` // Pass token in the Authorization header
+                }
+            });
             alert('Activity log created successfully!');
-            fetchActivityLogs(userId);
+            fetchActivityLogs(); // Refresh logs
             clearForm();
         } catch (error) {
             alert('Error saving activity log');
-            console.error("Error:", error);
+            console.error('Error:', error);
         }
-    };
-
-    const loadLogForEdit = (log) => {
-        setFormData({
-            activity_name: log.activity_name,
-            activity_duration: log.activity_duration,
-            distance: log.distance,
-            step_count: log.step_count,
-            user_id: log.user_id
-        });
-        setEditingLogId(log.log_id); // Set the ID of the log being edited
     };
 
     const clearForm = () => {
@@ -69,8 +64,7 @@ function ActivityLog() {
             activity_name: '',
             activity_duration: '',
             distance: '',
-            step_count: '',
-            user_id: ''
+            step_count: ''
         });
         setEditingLogId(null); // Clear editing state
     };
@@ -84,7 +78,6 @@ function ActivityLog() {
                 <InputActivityDuration value={formData.activity_duration} onChange={handleInputChange} />
                 <InputDistance value={formData.distance} onChange={handleInputChange} />
                 <InputStepCount value={formData.step_count} onChange={handleInputChange} />
-                <InputUserId value={formData.user_id} onChange={handleInputChange} />
                 <button type="button" onClick={saveLog}>
                     {editingLogId ? 'Update Activity' : 'Record Activity'}
                 </button>
@@ -116,9 +109,9 @@ function ActivityLog() {
                                 <td>{log.distance}</td>
                                 <td>{log.step_count}</td>
                                 <td>{log.calories_burnt}</td>
-                                <td>    
-                                {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{" "}
-                                {new Date(log.timestamp).toLocaleDateString('en-GB')}
+                                <td>
+                                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{" "}
+                                    {new Date(log.timestamp).toLocaleDateString('en-GB')}
                                 </td>
                             </tr>
                         ))

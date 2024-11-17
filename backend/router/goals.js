@@ -69,7 +69,7 @@ const calculateProgress = (goalId, callback) => {
     });
 };
 
-// Get all goals for a specific user with updated progress
+// Get all goals for the logged-in user with updated progress
 router.get('/', authenticateToken, (req, res) => {
     const userId = req.user.userId;
 
@@ -105,7 +105,7 @@ router.get('/', authenticateToken, (req, res) => {
     });
 });
 
-// Create a new goal for a user
+// Create a new goal for the logged-in user
 router.post('/', authenticateToken, (req, res) => {
     const { goal_name, goal_deadline, target_distance, activity_id } = req.body;
     const userId = req.user.userId;
@@ -150,7 +150,7 @@ router.post('/', authenticateToken, (req, res) => {
     });
 });
 
-// Update a goal
+// Update a goal for the logged-in user
 router.put('/:goal_id', authenticateToken, (req, res) => {
     const goalId = req.params.goal_id;
     const { goal_name, goal_deadline, target_distance, activity_id } = req.body;
@@ -196,7 +196,7 @@ router.put('/:goal_id', authenticateToken, (req, res) => {
     });
 });
 
-// Delete a goal
+// Delete a goal for the logged-in user
 router.delete('/:goal_id', authenticateToken, (req, res) => {
     const goalId = req.params.goal_id;
     const userId = req.user.userId;
