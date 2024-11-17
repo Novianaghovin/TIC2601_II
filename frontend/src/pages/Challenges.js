@@ -52,7 +52,8 @@ const Challenges = () => {
         (challenge.distance && challenge.distance.toString().includes(query)) ||
         challenge.challenge_id.toString().includes(query) ||
         challenge.status.toLowerCase().includes(query) ||
-        (challenge.progress && challenge.progress.toString().includes(query))
+        (challenge.progress && challenge.progress.toString().includes(query)) ||
+        (challenge.participants_num && challenge.participants_num.toString().includes(query)) 
     );
 
     setFilteredChallenges(filtered);
