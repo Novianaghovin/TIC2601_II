@@ -76,8 +76,6 @@ router.post('/api/join-challenge/:userId/:challengeId/:activityId', (req, res) =
     });
 });
 
-  
-
 // Route to fetch "My Challenges" (challenges the user has joined)
 router.get('/api/my-challenges/:userId', (req, res) => {
     const userId = req.params.userId;
@@ -98,64 +96,85 @@ router.get('/api/my-challenges/:userId', (req, res) => {
     });
 });
 
-// Route to refresh progress for all user challenges
-router.post('/api/refresh-progress/:userId', (req, res) => {
-    const userId = req.params.userId; 
+// Route to refresh all challenges
+router.post('/api/refresh-all/:userId', (req, res) => {
+    const userId = req.params.userId;
 
-    // Fetch all challenges for the user along with their distances and deadline
+    // Fetch all challenges for the user along with their distances, deadlines, and statuses
     const fetchChallengesQuery = `
-    SELECT uc.challenge_id, uc.user_id, ac.distance, ac.challenge_deadline
+    SELECT uc.challenge_id, uc.user_id, uc.status, ac.distance, ac.challenge_deadline
     FROM user_challenges AS uc
     JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
     WHERE uc.user_id = ?`;
 
-    db.all(fetchChallengesQuery, [userId], (err, challenges) => {
-        if (err) {
-            console.error('Error fetching user challenges:', err.message);
-            return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
-        }
+    db.serialize(() => {
+        db.run("BEGIN TRANSACTION;");
+        // Execute the fetch challenges query
+        db.all(fetchChallengesQuery, [userId], (err, challenges) => {
+            if (err) {
+                console.error('Error fetching challenges:', err.message);
+                db.run("ROLLBACK;");
+                return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
+            }
 
-        // Iterate over each challenge and calculate progress
-        challenges.forEach(challenge => {   
-            const { user_id, distance, challenge_id, challenge_deadline} = challenge;
+            challenges.forEach(challenge => {
+                const { user_id, distance, challenge_id, challenge_deadline, status } = challenge;
+                const currentDate = new Date();
+                const deadlineDate = new Date(challenge_deadline);
 
-            // Calculate total distance for this challenge
-            const totalDistanceQuery = 
-            `SELECT SUM(al.distance) AS totalDistance 
-             FROM activity_log AS al
-             JOIN user_challenges AS uc ON al.log_id = uc.activity_id
-             WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= uc.joined_at`;
+                if (currentDate > deadlineDate && status !== 'Expired') {
+                    // If the challenge has passed its deadline and is not already expired, mark it as expired
+                    const updateExpiredStatus = `UPDATE user_challenges SET status = 'Expired' WHERE user_id = ? AND challenge_id = ?`;
+                    db.run(updateExpiredStatus, [user_id, challenge_id], function(err) {
+                        if (err) {
+                            console.error('Error updating status to Expired:', err.message);
+                            db.run("ROLLBACK;");
+                            return;
+                        }
+                    });
+                } else if (status !== 'Expired') {
+                    // Only calculate and update progress for challenges that are not expired
+                    const totalDistanceQuery = `
+                    SELECT SUM(al.distance) AS totalDistance
+                    FROM activity_log AS al
+                    WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= 
+                    (SELECT joined_at FROM user_challenges WHERE user_id = ? AND challenge_id = ?)`;
 
-            db.get(totalDistanceQuery, [user_id, challenge_deadline], (err, row) => {
+                    db.get(totalDistanceQuery, [user_id, challenge_deadline, user_id, challenge_id], (err, row) => {
+                        if (err) {
+                            console.error('Error calculating total distance:', err.message);
+                            db.run("ROLLBACK;");
+                            return;
+                        }
+
+                        const totalDistance = row.totalDistance || 0;
+                        let progress = (totalDistance / distance) * 100;
+                        progress = progress > 100 ? 100 : progress;
+                        const newStatus = progress >= 100 ? 'Completed' : 'Active';
+
+                        db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
+                            [progress, newStatus, user_id, challenge_id], function(err) {
+                                if (err) {
+                                    console.error('Error updating progress and status:', err.message);
+                                    db.run("ROLLBACK;");
+                                    return;
+                                }
+                        });
+                    });
+                }
+            });
+
+            db.run("COMMIT;", (err) => {
                 if (err) {
-                    console.error('Error calculating total distance:', err.message);
-                    return;
+                    console.error('Error during COMMIT:', err.message);
+                    db.run("ROLLBACK;");
+                    return res.status(500).json({ success: false, message: 'Failed to commit transaction.' });
                 }
-
-                const totalDistance = row.totalDistance || 0;
-
-                // Calculate progress percentage
-                let progress = (totalDistance / distance) * 100;
-                if (progress >= 100) {
-                    progress = 100; // Cap progress at 100%
-                }
-                const status = progress >= 100 ? 'Completed' : 'Active';
-
-                // Update the user's progress and status in the user_challenges table
-                db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
-                    [progress, status, user_id, challenge_id], function(err) {
-                    if (err) {
-                        console.error('Error updating progress:', err.message);
-                    }
-                });
+                res.json({ success: true, message: 'Progress updates completed.' });
             });
         });
     });
-
-    // Send a response back once all updates are complete
-    res.json({ success: true, message: 'Progress has been updated for all challenges.' });
 });
-
 
 
 // Route to fetch activity id from the database

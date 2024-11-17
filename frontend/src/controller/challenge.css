@@ -38,18 +38,16 @@
 }
 
 .refresh-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 15px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+  background-color: #007bff; /* Primary color */
+  color: white;              /* Text color */
+  border: none;              /* No borders */
+  border-radius: 4px;        /* Rounded corners for aesthetics */
+  padding: 6px 9px;          /* Reduced padding to decrease size */
+  font-size: 15px;           /* Smaller font size */
+  cursor: pointer;           /* Cursor pointer for better UX */
+  margin-top: 5px;           /* Top margin for spacing */
+  margin-bottom: 5px;        /* Bottom margin for spacing */
+  align-self: flex-start;    /* Align to the start of the flex container */
 }
 
 .refresh-button:hover {

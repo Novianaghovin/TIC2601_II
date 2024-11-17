@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useChallenges from "./hooks/useChallenges";
 import ChallengeTable from "./components/challengeTable";
+import NavBar from "./components/NavBar";
 import "./challenge.css";
 
 const Challenges = () => {
@@ -41,8 +42,8 @@ const Challenges = () => {
     setFilteredChallenges(filtered);
   };
 
-  const refreshProgress = () => {
-    fetch(`http://localhost:3001/api/refresh-progress/${userId}`, { 
+  const refreshAll = () => {
+    fetch(`http://localhost:3001/api/refresh-all/${userId}`, { 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,21 +51,21 @@ const Challenges = () => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to refresh progress.");
+          throw new Error("Failed to refresh Challenges.");
         }
         return response.json();
       })
       .then((data) => {
         if (data.success) {
-          alert("Progress has been updated!");
+          alert("All Challenges has been updated!");
           fetchMyChallenges(); // Refresh "My Challenges" data
         } else {
-          alert(data.message || "Failed to refresh progress.");
+          alert(data.message || "Failed to refresh challenges.");
         }
       })
       .catch((error) => {
-        console.error("Error refreshing progress:", error);
-        alert("An error occurred while refreshing progress.");
+        console.error("Error refreshing challenges:", error);
+        alert("An error occurred while refreshing challenges.");
       });
   };
 
@@ -119,7 +120,7 @@ const Challenges = () => {
           </div>
         </div>
 
-        <button onClick={refreshProgress} className="refresh-button">Refresh</button>
+        <button onClick={refreshAll} className="refresh-button">Refresh All</button>
 
         <ChallengeTable
           challenges={filteredChallenges}
@@ -137,6 +138,6 @@ const Challenges = () => {
       </div>
     </div>
   );
-};
+};  
 
 export default Challenges;

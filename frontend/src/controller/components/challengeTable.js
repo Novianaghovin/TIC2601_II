@@ -44,34 +44,20 @@ const ChallengeTable = ({
                 <td>{challenge.participants_num || "0"}</td>
                 {isMyChallenges && (
                   <td>
-                    {calculateProgressPercentage
-                      ? calculateProgressPercentage(
-                          challenge.progress,
-                          challenge.target_value
-                        )
-                      : "0%"}
+                    {calculateProgressPercentage ? calculateProgressPercentage(challenge.progress, challenge.target_value): "0%"}
                   </td>
                 )}
                 <td>{challenge.status || "Active"}</td>
                 {isMyChallenges ? (
                   <td>
-                    <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>
-                      View Leaderboard
-                    </button>
+                    <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>View Leaderboard</button>
                   </td>
                 ) : (
                   <td>
                     <button
-                      onClick={() =>
-                        joinChallenge(challenge.activity_id, challenge.challenge_id)
-                      }
-                      disabled={isChallengeJoined && isChallengeJoined(challenge.challenge_id)}
-                      className={
-                        isChallengeJoined && isChallengeJoined(challenge.challenge_id)
-                          ? "button-disabled"
-                          : ""
-                      }
-                    >
+                      onClick={() => joinChallenge(challenge.activity_id, challenge.challenge_id)}
+                      disabled={challenge.status === 'Expired' || (isChallengeJoined && isChallengeJoined(challenge.challenge_id))}
+                      className={challenge.status === 'Expired' || (isChallengeJoined && isChallengeJoined(challenge.challenge_id)) ? "button-disabled": ""}>
                       Join
                     </button>
                   </td>
