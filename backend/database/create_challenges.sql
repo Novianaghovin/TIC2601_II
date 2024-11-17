@@ -20,11 +20,13 @@ CREATE TABLE user_challenges (
     status VARCHAR(10) NOT NULL CHECK (status IN ('Active', 'Completed', 'Expired')),
     progress DECIMAL(5,2) DEFAULT 0,
     joined_at DATE DEFAULT(CURRENT_DATE),
+    joined_month TEXT GENERATED ALWAYS AS (strftime('%Y-%m', joined_at)) STORED, -- Generated column
     FOREIGN KEY (user_id) REFERENCES user_profile(user_id) ON UPDATE CASCADE,
     FOREIGN KEY (challenge_id) REFERENCES avail_challenges(challenge_id) ON UPDATE CASCADE,
     FOREIGN KEY (activity_id) REFERENCES activity_log(log_id) ON UPDATE CASCADE,
-    CONSTRAINT unique_user_challenge_per_month UNIQUE (user_id, challenge_id, strftime('%Y-%m', joined_at)) -- editted additional constraint to ensure user can only join 1 challenge_id/month
+    CONSTRAINT unique_user_challenge_per_month UNIQUE (user_id, challenge_id, joined_month)
 );
+
 
 INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status, badge_id, distance, target_value)
 VALUES
@@ -36,9 +38,9 @@ VALUES
 INSERT INTO avail_challenges (challenge_type, challenge_deadline, activity_id, participants_num, status, badge_id, distance, target_value)
 VALUES
 -- Walking challenges
-('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 3, 'Active', 4, 0, 10000),
-('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 4, 'Active', 5, 0, 20000),
-('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 2, 'Active', 6, 0, 30000);
+('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 3, 'Active', 4, 0, 100),
+('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 4, 'Active', 5, 0, 100),
+('Walking', DATE('now', 'start of month', '+1 month', '-1 day'), 4, 2, 'Active', 6, 0, 100);
 
 -- Data to be inserted below based on the current number of participation
 -- progress will be updated based on challenges.js  

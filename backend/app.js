@@ -18,8 +18,8 @@ const activityType = require('./router/activity_type');
 const activityLog = require('./router/activity_log');
 const goals = require('./router/goals');
 // const badgeRouter = require('./router/badge');
-// const challengesRouter = require('./router/challenges');
-// const leaderboardRouter = require('./router/leaderboard');
+const Challenges = require('./router/challenges');
+const Leaderboard = require('./router/leaderboard');
 
 app.use('/user', user);
 app.use('/friends', friend);
@@ -27,8 +27,8 @@ app.use('/api/activity_type', activityType);
 app.use('/api/activity_log', activityLog);
 app.use('/api/goals', goals);
 // app.use(badgeRouter);   //badge alrd exist in the file not require to input
-// app.use(challengesRouter);
-// app.use(leaderboardRouter);
+app.use('/api/challenges', Challenges);
+app.use('/api/leaderboard', Leaderboard);
 
 
 const port = 3001;
