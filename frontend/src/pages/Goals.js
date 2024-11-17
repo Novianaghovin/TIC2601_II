@@ -4,6 +4,7 @@ import InputGoalName from '../components/InputGoalName';
 import InputTargetDistance from '../components/InputTargetDistance';
 import DateTime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
+import NavBar from "../components/Shared/Navbar";
 
 function Goals() {
     const [goals, setGoals] = useState([]);
@@ -123,73 +124,76 @@ function Goals() {
 
     return (
         <div>
-            <h1>My Goals</h1>
-            <form id="goalForm" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <InputGoalName value={formData.goal_name} onChange={handleInputChange} />
-                <DateTime
-                    value={formData.goal_deadline}
-                    onChange={handleDeadlineChange}
-                    dateFormat="DD/MM/YYYY"
-                    timeFormat="HH:mm"
-                />
-                <InputTargetDistance value={formData.target_distance} onChange={handleInputChange} />
-                
-                <select
-                    name="activity_id"
-                    value={formData.activity_id}
-                    onChange={handleInputChange}
-                    required
-                >
-                    <option value="" disabled>Select Activity Type</option>
-                    <option value="1">Run</option>
-                    <option value="2">Swim</option>
-                    <option value="3">Cycle</option>
-                    <option value="4">Walk</option>
-                </select>
-                
-                <button type="button" onClick={createOrUpdateGoal}>
-                    {editingGoalId ? 'Update Goal' : 'Set Goal'}
-                </button>
-                {editingGoalId && (
-                    <button type="button" onClick={cancelEdit} style={{ display: 'inline' }}>
-                        Cancel Edit
+            <NavBar /> {/* Add the navigation bar */}
+            <div style={{ padding: '20px' }}>
+                <h1>My Goals</h1>
+                <form id="goalForm" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <InputGoalName value={formData.goal_name} onChange={handleInputChange} />
+                    <DateTime
+                        value={formData.goal_deadline}
+                        onChange={handleDeadlineChange}
+                        dateFormat="DD/MM/YYYY"
+                        timeFormat="HH:mm"
+                    />
+                    <InputTargetDistance value={formData.target_distance} onChange={handleInputChange} />
+                    
+                    <select
+                        name="activity_id"
+                        value={formData.activity_id}
+                        onChange={handleInputChange}
+                        required
+                    >
+                        <option value="" disabled>Select Activity Type</option>
+                        <option value="1">Run</option>
+                        <option value="2">Swim</option>
+                        <option value="3">Cycle</option>
+                        <option value="4">Walk</option>
+                    </select>
+                    
+                    <button type="button" onClick={createOrUpdateGoal}>
+                        {editingGoalId ? 'Update Goal' : 'Set Goal'}
                     </button>
-                )}
-            </form>
-
-            <table border="1" style={{ marginTop: '20px', width: '100%' }}>
-                <thead>
-                    <tr>
-                        <th>Goal Name</th>
-                        <th>Deadline</th>
-                        <th>Target Distance (km)</th>
-                        <th>Progress (%)</th>
-                        <th>Activity Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {goals.length > 0 ? (
-                        goals.map((goal) => (
-                            <tr key={goal.goal_id}>
-                                <td>{goal.goal_name}</td>
-                                <td>{new Date(goal.goal_deadline).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
-                                <td>{goal.target_distance}</td>
-                                <td>{goal.progress ? parseFloat(goal.progress).toFixed(2) : '0.00'}%</td>
-                                <td>{goal.activity_name}</td>
-                                <td>
-                                    <button onClick={() => loadGoalForEdit(goal)}>Edit</button>
-                                    <button onClick={() => deleteGoal(goal.goal_id)}>Delete</button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="6">No goals found.</td>
-                        </tr>
+                    {editingGoalId && (
+                        <button type="button" onClick={cancelEdit} style={{ display: 'inline' }}>
+                            Cancel Edit
+                        </button>
                     )}
-                </tbody>
-            </table>
+                </form>
+
+                <table border="1" style={{ marginTop: '20px', width: '100%' }}>
+                    <thead>
+                        <tr>
+                            <th>Goal Name</th>
+                            <th>Deadline</th>
+                            <th>Target Distance (km)</th>
+                            <th>Progress (%)</th>
+                            <th>Activity Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {goals.length > 0 ? (
+                            goals.map((goal) => (
+                                <tr key={goal.goal_id}>
+                                    <td>{goal.goal_name}</td>
+                                    <td>{new Date(goal.goal_deadline).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                                    <td>{goal.target_distance}</td>
+                                    <td>{goal.progress ? parseFloat(goal.progress).toFixed(2) : '0.00'}%</td>
+                                    <td>{goal.activity_name}</td>
+                                    <td>
+                                        <button onClick={() => loadGoalForEdit(goal)}>Edit</button>
+                                        <button onClick={() => deleteGoal(goal.goal_id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6">No goals found.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
