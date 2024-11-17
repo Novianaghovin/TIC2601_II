@@ -69,6 +69,38 @@ const calculateProgress = (goalId, callback) => {
     });
 };
 
+// Recalculate progress for all existing goals in the database
+const recalculateAllProgress = () => {
+    const sqlGetGoals = `SELECT goal_id FROM goals`;
+
+    db.all(sqlGetGoals, [], (err, goals) => {
+        if (err) {
+            console.error('Error fetching goals: ' + err.message);
+            return;
+        }
+
+        goals.forEach((goal) => {
+            calculateProgress(goal.goal_id, (err, progress) => {
+                if (err) {
+                    console.error(`Error calculating progress for goal_id ${goal.goal_id}: ` + err.message);
+                } else {
+                    const sqlUpdateProgress = `UPDATE goals SET progress = ? WHERE goal_id = ?`;
+                    db.run(sqlUpdateProgress, [progress, goal.goal_id], (err) => {
+                        if (err) {
+                            console.error(`Error updating progress for goal_id ${goal.goal_id}: ` + err.message);
+                        } else {
+                            console.log(`Progress updated for goal_id ${goal.goal_id}: ${progress}%`);
+                        }
+                    });
+                }
+            });
+        });
+    });
+};
+
+// Call recalculateAllProgress on server startup
+recalculateAllProgress();
+
 // Get all goals for the logged-in user with updated progress
 router.get('/', authenticateToken, (req, res) => {
     const userId = req.user.userId;

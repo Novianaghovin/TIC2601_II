@@ -107,8 +107,8 @@ router.post('/', authenticateToken, (req, res) => {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const sqlGetMultiplier = 'SELECT activity_multiplier FROM activity_type WHERE LOWER(activity_name) = ?';
-    db.get(sqlGetMultiplier, [activity_name.toLowerCase()], (err, row) => {
+    const sqlGetActivity = 'SELECT activity_id, activity_multiplier FROM activity_type WHERE LOWER(activity_name) = ?';
+    db.get(sqlGetActivity, [activity_name.toLowerCase()], (err, row) => {
         if (err) {
             console.error('Error retrieving activity multiplier:', err);
             return res.status(500).json({ error: 'Unable to retrieve activity multiplier.' });
@@ -117,20 +117,20 @@ router.post('/', authenticateToken, (req, res) => {
             return res.status(404).json({ error: 'Invalid activity type.' });
         }
 
-        const calories_burnt = activity_duration * row.activity_multiplier;
+        const { activity_id, activity_multiplier } = row;
+        const calories_burnt = activity_duration * activity_multiplier;
 
         const sqlInsert = `
             INSERT INTO activity_log (activity_duration, distance, step_count, calories_burnt, activity_id, user_id)
-            VALUES (?, ?, ?, ?, (SELECT activity_id FROM activity_type WHERE LOWER(activity_name) = ?), ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
-        db.run(sqlInsert, [activity_duration, distance, step_count, calories_burnt, activity_name.toLowerCase(), userId], function (err) {
+        db.run(sqlInsert, [activity_duration, distance, step_count, calories_burnt, activity_id, userId], function (err) {
             if (err) {
                 console.error('Error inserting activity log:', err);
                 return res.status(500).json({ error: 'Unable to create activity log.' });
             }
 
-            const activityId = this.lastID;
-            recalculateProgressForGoals(userId, activityId, (err) => {
+            recalculateProgressForGoals(userId, activity_id, (err) => {
                 if (err) {
                     console.error('Error recalculating progress:', err);
                     return res.status(500).json({ error: 'Error recalculating goal progress.' });
