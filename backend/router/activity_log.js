@@ -1,7 +1,7 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const router = express.Router();
-const db = new sqlite3.Database('./database/database.db');
+const db = new sqlite3.Database('../database.db');
 
 // Helper function to recalculate goal progress
 const recalculateProgressForGoals = (userId, activityId, callback) => {

@@ -2,7 +2,7 @@ const express = require('express')
 const sqlite3 = require('sqlite3').verbose()
 
 const router = express.Router()
-const db = new sqlite3.Database('./database/database.db')
+const db = new sqlite3.Database('../database.db')
 
 // View all activity types
 router.get('/', (req, res) => {
