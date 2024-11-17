@@ -53,7 +53,6 @@ function Goals() {
             };
 
             if (editingGoalId) {
-                // Update an existing goal
                 await axios.put(`http://localhost:3000/api/goals/${editingGoalId}`, formattedData, {
                     headers: {
                         Authorization: `Bearer ${token}` // Include token in Authorization header
@@ -61,7 +60,6 @@ function Goals() {
                 });
                 alert('Goal updated successfully!');
             } else {
-                // Create a new goal
                 await axios.post('http://localhost:3000/api/goals', formattedData, {
                     headers: {
                         Authorization: `Bearer ${token}` // Include token in Authorization header
@@ -127,16 +125,19 @@ function Goals() {
             <NavBar /> {/* Add the navigation bar */}
             <div style={{ padding: '20px' }}>
                 <h1>My Goals</h1>
-                <form id="goalForm" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {/* Horizontal Layout Form */}
+                <div id="goalForm" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                     <InputGoalName value={formData.goal_name} onChange={handleInputChange} />
                     <DateTime
                         value={formData.goal_deadline}
                         onChange={handleDeadlineChange}
                         dateFormat="DD/MM/YYYY"
                         timeFormat="HH:mm"
+                        inputProps={{
+                            style: { width: '200px', padding: '5px' } // Adjust the width and padding here
+                        }}
                     />
                     <InputTargetDistance value={formData.target_distance} onChange={handleInputChange} />
-                    
                     <select
                         name="activity_id"
                         value={formData.activity_id}
@@ -149,16 +150,19 @@ function Goals() {
                         <option value="3">Cycle</option>
                         <option value="4">Walk</option>
                     </select>
-                    
-                    <button type="button" onClick={createOrUpdateGoal}>
+                    <button type="button" onClick={createOrUpdateGoal}
+                    style={{ fontSize: '12px', padding: '5px 10px', height: '35px', width: 'auto' }}
+                    >
                         {editingGoalId ? 'Update Goal' : 'Set Goal'}
+                        
                     </button>
                     {editingGoalId && (
-                        <button type="button" onClick={cancelEdit} style={{ display: 'inline' }}>
+                        <button type="button" onClick={cancelEdit}
+                        style={{ fontSize: '12px', padding: '5px 10px', height: '35px', width: 'auto' }}>
                             Cancel Edit
                         </button>
                     )}
-                </form>
+                </div>
 
                 <table border="1" style={{ marginTop: '20px', width: '100%' }}>
                     <thead>
@@ -181,8 +185,12 @@ function Goals() {
                                     <td>{goal.progress ? parseFloat(goal.progress).toFixed(2) : '0.00'}%</td>
                                     <td>{goal.activity_name}</td>
                                     <td>
-                                        <button onClick={() => loadGoalForEdit(goal)}>Edit</button>
-                                        <button onClick={() => deleteGoal(goal.goal_id)}>Delete</button>
+                                        <button onClick={() => loadGoalForEdit(goal)}
+                                            style={{ fontSize: '12px', padding: '5px 10px', height: '30px', width: 'auto' }}
+                                            >Edit</button>
+                                        <button onClick={() => deleteGoal(goal.goal_id)}
+                                            style={{ fontSize: '12px', padding: '5px 10px', height: '30px', width: 'auto' }}
+                                            >Delete</button>
                                     </td>
                                 </tr>
                             ))

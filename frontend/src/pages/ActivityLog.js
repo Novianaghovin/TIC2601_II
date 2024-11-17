@@ -14,7 +14,6 @@ function ActivityLog() {
         distance: '',
         step_count: ''
     });
-    const [editingLogId, setEditingLogId] = useState(null);
 
     useEffect(() => {
         fetchActivityLogs();
@@ -67,7 +66,6 @@ function ActivityLog() {
             distance: '',
             step_count: ''
         });
-        setEditingLogId(null); // Clear editing state
     };
 
     return (
@@ -75,21 +73,18 @@ function ActivityLog() {
             <NavBar /> {/* Add the navigation bar */}
             <div style={{ padding: '20px' }}>
                 <h1>My Activity</h1>
-                <form id="logForm" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label htmlFor="activityType">Activity Type:</label>
+                {/* Horizontal Layout Form */}
+                <div id="logForm" style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
                     <InputActivityType value={formData.activity_name} onChange={handleInputChange} />
                     <InputActivityDuration value={formData.activity_duration} onChange={handleInputChange} />
                     <InputDistance value={formData.distance} onChange={handleInputChange} />
                     <InputStepCount value={formData.step_count} onChange={handleInputChange} />
-                    <button type="button" onClick={saveLog}>
-                        {editingLogId ? 'Update Activity' : 'Record Activity'}
+                    <button type="button" onClick={saveLog}
+                    style={{ fontSize: '12px', padding: '5px 10px', height: '35px', width: 'auto' }}
+                    >
+                        Record Activity
                     </button>
-                    {editingLogId && (
-                        <button type="button" onClick={clearForm} style={{ marginLeft: '10px' }}>
-                            Cancel Edit
-                        </button>
-                    )}
-                </form>
+                </div>
 
                 <table border="1" style={{ marginTop: '20px', width: '100%' }}>
                     <thead>
@@ -112,8 +107,8 @@ function ActivityLog() {
                                     <td>{log.step_count}</td>
                                     <td>{log.calories_burnt}</td>
                                     <td>
-                                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{" "}
-                                        {new Date(log.timestamp).toLocaleDateString('en-GB')}
+                                        {new Date(log.timestamp).toLocaleDateString('en-GB')}{" "}
+                                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </td>
                                 </tr>
                             ))
