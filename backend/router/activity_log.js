@@ -1,7 +1,20 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 const router = express.Router();
-const db = new sqlite3.Database('../database.db');
+const authenticateToken = require('../authenticateToken'); // Import token authentication middleware
+
+// Initialize the database
+const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) => {
+    if (err) {
+        console.error('Error opening database: ' + err.message);
+        process.exit(1); // Exit process if database connection fails
+    } else {
+        console.log('Connected to the database.');
+    }
+});
+
+console.log('Activity log route loaded');
 
 // Helper function to recalculate goal progress
 const recalculateProgressForGoals = (userId, activityId, callback) => {
@@ -60,8 +73,8 @@ const recalculateProgressForGoals = (userId, activityId, callback) => {
     });
 };
 
-// Get all activity logs by user ID (User can only view their own activities)
-router.get('/user/:user_id', (req, res) => {
+// Get all activity logs for a user
+router.get('/user/:user_id', authenticateToken, (req, res) => {
     const userId = req.params.user_id;
     const sql = `
         SELECT 
@@ -78,86 +91,51 @@ router.get('/user/:user_id', (req, res) => {
     `;
     db.all(sql, [userId], (err, rows) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Database error: ' + err.message });
         }
-        if (rows.length > 0) {
-            res.status(200).json(rows);
-        } else {
-            res.status(404).json({ error: 'No activity logs found for this user.' });
-        }
+        res.status(200).json(rows.length > 0 ? rows : { message: 'No activity logs found for this user.' });
     });
 });
 
-// Create a new activity log (User can only add their own activities)
-router.post('/', (req, res) => {
-    const { activity_name, activity_duration, distance, step_count, user_id } = req.body;
+// Create a new activity log
+router.post('/', authenticateToken, (req, res) => {
+    const { activity_name, activity_duration, distance, step_count } = req.body;
+    const userId = req.user.userId; // Extracted from token
 
     // Validate required inputs
-    if (!activity_name || !activity_duration || !distance || !step_count || !user_id) {
-        return res.status(400).send('Bad Request: All fields (activity name, duration, distance, steps, user ID) are required.');
+    if (!activity_name || !activity_duration || !distance || !step_count) {
+        return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    // Validate activity type
-    const validActivities = ['run', 'swim', 'cycle', 'walk'];
-    if (!validActivities.includes(activity_name.toLowerCase())) {
-        return res.status(400).send('Bad Request: Invalid activity name. Choose from run, swim, cycle, or walk.');
-    }
-
-    // Fetch the activity multiplier based on activity type
     const sqlGetMultiplier = 'SELECT activity_multiplier FROM activity_type WHERE LOWER(activity_name) = ?';
     db.get(sqlGetMultiplier, [activity_name.toLowerCase()], (err, row) => {
         if (err) {
             console.error('Error retrieving activity multiplier:', err);
-            return res.status(500).send('Internal Server Error: Unable to retrieve activity multiplier.');
+            return res.status(500).json({ error: 'Unable to retrieve activity multiplier.' });
         }
         if (!row) {
-            return res.status(404).send('Not Found: Invalid activity type.');
+            return res.status(404).json({ error: 'Invalid activity type.' });
         }
 
-        // Calculate calories burned (Formula: duration * multiplier)
         const calories_burnt = activity_duration * row.activity_multiplier;
 
-        // Insert the new activity log
         const sqlInsert = `
             INSERT INTO activity_log (activity_duration, distance, step_count, calories_burnt, activity_id, user_id)
             VALUES (?, ?, ?, ?, (SELECT activity_id FROM activity_type WHERE LOWER(activity_name) = ?), ?)
         `;
-        db.run(sqlInsert, [activity_duration, distance, step_count, calories_burnt, activity_name.toLowerCase(), user_id], function (err) {
+        db.run(sqlInsert, [activity_duration, distance, step_count, calories_burnt, activity_name.toLowerCase(), userId], function (err) {
             if (err) {
                 console.error('Error inserting activity log:', err);
-                return res.status(500).send('Internal Server Error: ' + err.message);
+                return res.status(500).json({ error: 'Unable to create activity log.' });
             }
 
-            // Recalculate progress for associated goals
             const activityId = this.lastID;
-            recalculateProgressForGoals(user_id, activityId, (err) => {
+            recalculateProgressForGoals(userId, activityId, (err) => {
                 if (err) {
                     console.error('Error recalculating progress:', err);
-                    return res.status(500).send('Error recalculating progress: ' + err.message);
+                    return res.status(500).json({ error: 'Error recalculating goal progress.' });
                 }
-
-                // Retrieve the newly inserted log entry to send back as response
-                const sqlSelectNewLog = `
-                    SELECT 
-                        activity_log.log_id, 
-                        activity_type.activity_name, 
-                        activity_log.activity_duration, 
-                        activity_log.distance, 
-                        activity_log.step_count, 
-                        activity_log.calories_burnt, 
-                        activity_log.timestamp
-                    FROM activity_log
-                    JOIN activity_type ON activity_log.activity_id = activity_type.activity_id
-                    WHERE activity_log.log_id = ?
-                `;
-                db.get(sqlSelectNewLog, [activityId], (err, newLog) => {
-                    if (err) {
-                        console.error('Error retrieving new activity log:', err);
-                        return res.status(500).send('Internal Server Error: ' + err.message);
-                    }
-
-                    res.status(201).json(newLog); // Return the newly created entry as JSON
-                });
+                res.status(201).json({ message: 'Activity log created successfully.' });
             });
         });
     });

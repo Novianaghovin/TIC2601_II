@@ -1,8 +1,20 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
-
+const path = require('path');
 const router = express.Router();
-const db = new sqlite3.Database('../database.db');
+const authenticateToken = require('../authenticateToken'); // Import token authentication middleware
+
+// Initialize the database
+const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) => {
+    if (err) {
+        console.error('Error opening database: ' + err.message);
+        process.exit(1); // Exit process if database connection fails
+    } else {
+        console.log('Connected to the database.');
+    }
+});
+
+console.log('Goals route loaded');
 
 // Helper function to validate ISO date format
 const isValidISODate = (dateString) => {
@@ -11,18 +23,15 @@ const isValidISODate = (dateString) => {
 };
 
 // Helper function to validate goal data
-const validateGoalData = ({ goal_name, goal_deadline, target_distance, user_id, activity_id }) => {
+const validateGoalData = ({ goal_name, goal_deadline, target_distance, activity_id }) => {
     if (!goal_name || typeof goal_name !== 'string') {
         return 'Goal name is required and must be a string.';
     }
     if (!goal_deadline || !isValidISODate(goal_deadline)) {
-        return 'Goal deadline is required and must be in ISO format (e.g., 2024-12-31T23:59:59.999Z).';
+        return 'Goal deadline is required and must be in ISO format.';
     }
     if (!target_distance || isNaN(target_distance) || target_distance <= 0) {
         return 'Target distance is required and must be a positive number.';
-    }
-    if (!user_id || isNaN(user_id) || user_id <= 0) {
-        return 'User ID is required and must be a positive number.';
     }
     if (!activity_id || isNaN(activity_id) || activity_id <= 0) {
         return 'Activity ID is required and must be a positive number.';
@@ -37,8 +46,6 @@ const calculateProgress = (goalId, callback) => {
             g.target_distance, 
             g.created_date, 
             g.goal_deadline, 
-            g.user_id, 
-            g.activity_id,
             IFNULL(SUM(al.distance), 0) AS total_distance
         FROM goals g
         LEFT JOIN activity_log al 
@@ -63,12 +70,8 @@ const calculateProgress = (goalId, callback) => {
 };
 
 // Get all goals for a specific user with updated progress
-router.get('/', (req, res) => {
-    const userId = req.query.user_id;
-
-    if (!userId) {
-        return res.status(400).json({ error: 'User ID is required to view goals.' });
-    }
+router.get('/', authenticateToken, (req, res) => {
+    const userId = req.user.userId;
 
     const sql = `
         SELECT g.goal_id, g.goal_name, g.goal_deadline, g.target_distance, g.progress, g.user_id, 
@@ -83,7 +86,6 @@ router.get('/', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
 
-        // Update progress for each goal
         const updatedGoals = await Promise.all(
             rows.map(async (goal) => {
                 return new Promise((resolve, reject) => {
@@ -91,7 +93,7 @@ router.get('/', (req, res) => {
                         if (err) {
                             reject(err);
                         } else {
-                            goal.progress = parseFloat(progress) || 0; // Ensure progress is numeric
+                            goal.progress = parseFloat(progress) || 0;
                             resolve(goal);
                         }
                     });
@@ -104,11 +106,11 @@ router.get('/', (req, res) => {
 });
 
 // Create a new goal for a user
-router.post('/', (req, res) => {
-    const { goal_name, goal_deadline, target_distance, user_id, activity_id } = req.body;
+router.post('/', authenticateToken, (req, res) => {
+    const { goal_name, goal_deadline, target_distance, activity_id } = req.body;
+    const userId = req.user.userId;
 
-    // Validate input data
-    const validationError = validateGoalData({ goal_name, goal_deadline, target_distance, user_id, activity_id });
+    const validationError = validateGoalData({ goal_name, goal_deadline, target_distance, activity_id });
     if (validationError) {
         return res.status(400).json({ error: validationError });
     }
@@ -118,7 +120,7 @@ router.post('/', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    db.run(sqlInsert, [goal_name, goal_deadline, target_distance, 0, user_id, activity_id], function(err) {
+    db.run(sqlInsert, [goal_name, goal_deadline, target_distance, 0, userId, activity_id], function (err) {
         if (err) {
             return res.status(500).json({ error: 'Internal Server Error: ' + err.message });
         }
@@ -140,7 +142,7 @@ router.post('/', (req, res) => {
                         return res.status(500).json({ error: 'Internal Server Error: ' + err.message });
                     }
 
-                    newGoal.progress = parseFloat(newGoal.progress) || 0; // Ensure progress is numeric
+                    newGoal.progress = parseFloat(newGoal.progress) || 0;
                     res.status(201).json(newGoal);
                 });
             });
@@ -148,104 +150,68 @@ router.post('/', (req, res) => {
     });
 });
 
-// Update a goal with datetime for deadline
-router.put('/:goal_id', (req, res) => {
+// Update a goal
+router.put('/:goal_id', authenticateToken, (req, res) => {
     const goalId = req.params.goal_id;
-    const { goal_name, goal_deadline, target_distance, user_id, activity_id } = req.body;
+    const { goal_name, goal_deadline, target_distance, activity_id } = req.body;
+    const userId = req.user.userId;
 
-    // Validate input data
-    const validationError = validateGoalData({ goal_name, goal_deadline, target_distance, user_id, activity_id });
+    const validationError = validateGoalData({ goal_name, goal_deadline, target_distance, activity_id });
     if (validationError) {
         return res.status(400).json({ error: validationError });
     }
 
-    // Check if the goal exists for the user
-    db.get('SELECT * FROM goals WHERE goal_id = ? AND user_id = ?', [goalId, user_id], (err, goal) => {
+    const sqlUpdate = `
+        UPDATE goals 
+        SET goal_name = ?, goal_deadline = ?, target_distance = ?, activity_id = ?
+        WHERE goal_id = ? AND user_id = ?
+    `;
+
+    db.run(sqlUpdate, [goal_name, goal_deadline, target_distance, activity_id, goalId, userId], function (err) {
         if (err) {
-            console.error('Error checking goal existence:', err);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
-        if (!goal) {
-            return res.status(404).json({ error: 'Goal not found or not owned by the user.' });
-        }
 
-        // Update the goal
-        const sqlUpdate = `
-            UPDATE goals 
-            SET goal_name = ?, goal_deadline = ?, target_distance = ?, activity_id = ?
-            WHERE goal_id = ? AND user_id = ?
-        `;
-
-        db.run(sqlUpdate, [goal_name, goal_deadline, target_distance, activity_id, goalId, user_id], function(err) {
+        calculateProgress(goalId, (err, progress) => {
             if (err) {
-                console.error('Error updating goal:', err);
-                return res.status(500).json({ error: 'Internal Server Error' });
+                return res.status(500).json({ error: 'Error recalculating progress' });
             }
 
-            // Recalculate progress after the update
-            calculateProgress(goalId, (err, progress) => {
+            const sqlProgressUpdate = `UPDATE goals SET progress = ? WHERE goal_id = ?`;
+            db.run(sqlProgressUpdate, [progress, goalId], (err) => {
                 if (err) {
-                    console.error('Error recalculating progress:', err);
-                    return res.status(500).json({ error: 'Error recalculating progress' });
+                    return res.status(500).json({ error: 'Error updating progress' });
                 }
 
-                const sqlProgressUpdate = `UPDATE goals SET progress = ? WHERE goal_id = ?`;
-                db.run(sqlProgressUpdate, [progress, goalId], (err) => {
+                db.get('SELECT * FROM goals WHERE goal_id = ?', [goalId], (err, updatedGoal) => {
                     if (err) {
-                        console.error('Error updating progress:', err);
-                        return res.status(500).json({ error: 'Error updating progress' });
+                        return res.status(500).json({ error: 'Error retrieving updated goal' });
                     }
 
-                    // Respond with the updated goal
-                    db.get('SELECT * FROM goals WHERE goal_id = ?', [goalId], (err, updatedGoal) => {
-                        if (err) {
-                            console.error('Error retrieving updated goal:', err);
-                            return res.status(500).json({ error: 'Error retrieving updated goal' });
-                        }
-
-                        updatedGoal.progress = parseFloat(updatedGoal.progress) || 0; // Ensure progress is numeric
-                        res.status(200).json(updatedGoal);
-                    });
+                    updatedGoal.progress = parseFloat(updatedGoal.progress) || 0;
+                    res.status(200).json(updatedGoal);
                 });
             });
         });
     });
 });
 
-// Delete a goal for a user
-router.delete('/:goal_id', (req, res) => {
+// Delete a goal
+router.delete('/:goal_id', authenticateToken, (req, res) => {
     const goalId = req.params.goal_id;
-    const userId = req.query.user_id; // Assuming user ID is sent as a query parameter
+    const userId = req.user.userId;
 
-    // Validate the inputs
-    if (!goalId || !userId) {
-        return res.status(400).json({ error: 'Goal ID and User ID are required to delete a goal.' });
-    }
-
-    // Check if the goal exists for the user
-    db.get('SELECT * FROM goals WHERE goal_id = ? AND user_id = ?', [goalId, userId], (err, goal) => {
+    const sqlDelete = 'DELETE FROM goals WHERE goal_id = ? AND user_id = ?';
+    db.run(sqlDelete, [goalId, userId], function (err) {
         if (err) {
-            console.error('Error checking goal existence:', err);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Error deleting goal: ' + err.message });
         }
-        if (!goal) {
+
+        if (this.changes === 0) {
             return res.status(404).json({ error: 'Goal not found or not owned by the user.' });
         }
 
-        // Proceed to delete the goal
-        const sqlDelete = 'DELETE FROM goals WHERE goal_id = ? AND user_id = ?';
-        db.run(sqlDelete, [goalId, userId], function(err) {
-            if (err) {
-                console.error('Error deleting goal:', err);
-                return res.status(500).json({ error: 'Error deleting goal: ' + err.message });
-            }
-
-            if (this.changes === 0) {
-                return res.status(404).json({ error: 'Goal not found or already deleted.' });
-            }
-
-            res.status(200).json({ message: 'Goal deleted successfully.' });
-        });
+        res.status(200).json({ message: 'Goal deleted successfully.' });
     });
 });
 
