@@ -5,7 +5,8 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import WelcomePage from './components/Welcome/WelcomePage';
 import FriendPage from './pages/FriendPage';
-
+import ActivityLog from './pages/ActivityLog';
+import Goals from './pages/Goals';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -22,6 +23,8 @@ const App = () => {
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/friends" element={<FriendPage />} />
+          <Route path="/activities" element={<ActivityLog />} />
+          <Route path="/goals" element={<Goals />} />
           {/* <Route path="/badges" element={<Badges />} />
           <Route path="/challenges" element={<Challenges />} /> */}
           {/* Default Route */}
