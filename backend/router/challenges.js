@@ -40,12 +40,13 @@ router.post('/join-challenge/:challengeId/:activityId', authenticateToken, (req,
         return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
-    // First, get the challenge deadline
-    db.get('SELECT challenge_deadline FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, challenge) => {
+    // Fetch challenge deadline and status
+    db.get('SELECT challenge_deadline, status FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, challenge) => {
         if (err) {
-            console.error('Error fetching challenge deadline:', err.message);
-            return res.status(500).json({ success: false, message: 'Database query failed' });
+            console.error('Error fetching challenge:', err.message);
+            return res.status(500).json({ success: false, message: 'Database query failed.' });
         }
+
         if (!challenge) {
             return res.status(404).json({ success: false, message: 'Challenge not found.' });
         }
@@ -53,35 +54,50 @@ router.post('/join-challenge/:challengeId/:activityId', authenticateToken, (req,
         const currentDate = new Date();
         const deadlineDate = new Date(challenge.challenge_deadline);
 
-        // Check if current date is before the deadline
+        // Check if the challenge is expired
         if (currentDate > deadlineDate) {
-            return res.status(400).json({ success: false, message: 'This challenge has already expired.' });
+            // Update the challenge status to "Expired"
+            db.run('UPDATE avail_challenges SET status = ? WHERE challenge_id = ?', ['Expired', challengeId], (updateErr) => {
+                if (updateErr) {
+                    console.error('Error updating challenge status to Expired:', updateErr.message);
+                    return res.status(500).json({ success: false, message: 'Failed to update challenge status.' });
+                }
+
+                // Respond with an error after updating the status
+                return res.status(400).json({ success: false, message: 'This challenge has already expired.' });
+            });
+
+            return; // Exit here to ensure no further processing
         }
 
         // Check if the user is already part of the challenge
         db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
             if (err) {
-                console.error('Error checking existing entry:', err.message);
-                return res.status(500).json({ success: false, message: 'Database query failed' });
+                console.error('Error checking user challenge:', err.message);
+                return res.status(500).json({ success: false, message: 'Database query failed.' });
             }
+
             if (row) {
                 return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
             }
 
             // Insert new entry if not already joined
-            db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
-                [userId, challengeId, activityId, 'Active', '0'], function(err) {
+            db.run(
+                'INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
+                [userId, challengeId, activityId, 'Active', '0'],
+                function (err) {
                     if (err) {
                         console.error('Error joining challenge:', err.message);
                         return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
                     }
 
                     // Increment participants count in the avail_challenges table
-                    db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function(err) {
+                    db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function (err) {
                         if (err) {
                             console.error('Error updating participants count:', err.message);
                             return res.status(500).json({ success: false, message: 'Failed to update participants count.' });
                         }
+
                         res.json({ success: true, message: 'Successfully joined the challenge!' });
                     });
                 }
@@ -89,7 +105,6 @@ router.post('/join-challenge/:challengeId/:activityId', authenticateToken, (req,
         });
     });
 });
-
 
 
 // Route to fetch "My Challenges" (challenges the user has joined)
