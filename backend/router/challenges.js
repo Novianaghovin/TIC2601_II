@@ -188,10 +188,25 @@ router.post('/refresh-all', authenticateToken, (req, res) => {
                                     db.run("ROLLBACK;");
                                     return;
                                 }
-                        });
+
+                                // If the challenge is marked as completed, update the avail_challenges table
+                                if (newStatus === 'Completed') {
+                                    const updateAvailChallengesStatus = `
+                                    UPDATE avail_challenges SET status = 'Completed' WHERE challenge_id = ?`;
+                                    db.run(updateAvailChallengesStatus, [challenge_id], function(err) {
+                                        if (err) {
+                                            console.error('Error updating avail_challenges status to Completed:', err.message);
+                                            db.run("ROLLBACK;");
+                                            return;
+                                        }
+                                    });
+                                }
+                            }
+                        );
                     });
                 }
             });
+
             db.run("COMMIT;", (err) => {
                 if (err) {
                     console.error('Error during COMMIT:', err.message);
@@ -203,6 +218,7 @@ router.post('/refresh-all', authenticateToken, (req, res) => {
         });
     });
 });
+
 
 // Route to fetch activity id from the database
 router.get('/get-activity/:activityID', (req, res) => {

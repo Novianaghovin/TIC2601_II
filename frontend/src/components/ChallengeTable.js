@@ -66,7 +66,7 @@ const ChallengeTable = ({
                 <td>{challenge.challenge_id}</td>
                 <td>{challenge.challenge_type}</td>
                 <td>{challenge.distance || "N/A"}</td>
-                {isMyChallenges && <td>{challenge.joined_on || "N/A"}</td>}
+                {isMyChallenges && <td>{challenge.joined_at || "N/A"}</td>}
                 <td>{challenge.challenge_deadline || "N/A"}</td>
                 <td>{challenge.participants_num || "0"}</td>
                 {isMyChallenges && (
@@ -74,8 +74,7 @@ const ChallengeTable = ({
                     {calculateProgressPercentage? calculateProgressPercentage(challenge.progress,challenge.target_value): "0%"}
                   </td>
                 )}
-                <td>{challenge.status || "Active"}</td>
-                {isMyChallenges ? (
+                <td>{challenge.status || "Active"}</td>{isMyChallenges ? (
                   <td>
                     <button onClick={() => handleViewLeaderboard(challenge.challenge_id)}>View Leaderboard</button>
                   </td>
@@ -86,7 +85,7 @@ const ChallengeTable = ({
                         joinChallenge(challenge.activity_id, challenge.challenge_id)
                       }
                       disabled={
-                        challenge.status === "Expired" ||(isChallengeJoined &&isChallengeJoined(challenge.challenge_id))}>Join</button>
+                        challenge.status === "Expired" || challenge.status === "Completed" ||(isChallengeJoined &&isChallengeJoined(challenge.challenge_id))}>Join</button>
                   </td>
                 )}
               </tr>
