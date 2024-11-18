@@ -8,6 +8,7 @@ import FriendPage from './pages/FriendPage';
 import ActivityLog from './pages/ActivityLog';
 import Goals from './pages/Goals';
 import Challenges from './pages/Challenges';
+import Badges from './Badge/badgesMonthly';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -27,8 +28,7 @@ const App = () => {
           <Route path="/activities" element={<ActivityLog />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/challenges/*" element={<Challenges />} /> 
-          { /* <Route path="/badges" element={<Badges />} /> 
-          { /* Default Route */}
+          <Route path="/badges" element={<Badges />} />
           {<Route path="/" element={<h1>Welcome to the Dashboard</h1>} />}
         </Routes>
   );

@@ -20,6 +20,7 @@ const goals = require('./router/goals');
 // const badgeRouter = require('./router/badge');
 const Challenges = require('./router/challenges');
 const Leaderboard = require('./router/leaderboard');
+const badge = require('./router/badgeYearly');
 
 app.use('/user', user);
 app.use('/friends', friend);
@@ -29,7 +30,7 @@ app.use('/api/goals', goals);
 // app.use(badgeRouter);   //badge alrd exist in the file not require to input
 app.use('/api/challenges', Challenges);
 app.use('/api/leaderboard', Leaderboard);
-
+app.use('/api', badge);
 
 const port = 3001;
 app.listen(port, () => {

@@ -14,20 +14,15 @@ const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) =>
     }
 });
 
-console.log('Badge route loaded');
+// Middleware to parse JSON requests (if needed)
+router.use(express.json());
 
-// Get all badges for the logged-in user with a specific month and year
-router.get('/badgeCompleted/:month/:year', authenticateToken, (req, res) => {
-    const { month, year } = req.params; // Extract month and year from URL params
-    const { userId } = req.user; // Extract userId from the decoded token
+// Route: Get all completed badges for a specific user, month, and year
+router.get('/badgeCompleted/:user_id/:month/:year', authenticateToken, (req, res) => {
+    const { user_id, month, year } = req.params; // Get user_id, month, and year from URL parameters
+    console.log(`Received request for user_id: ${user_id}, month: ${month}, year: ${year}`); // Log parameters
 
-    if (!userId) {
-        console.error('User ID is undefined or missing.');
-        return res.status(400).json({ error: 'User ID not found in token' });
-    }
-
-    console.log(`Received request for user_id: ${userId}, month: ${month}, year: ${year}`);
-
+    // SQL Query to fetch completed badges for the specific user, month, and year
     const sql = `
     SELECT DISTINCT 
         uc.user_id, 
@@ -45,18 +40,15 @@ router.get('/badgeCompleted/:month/:year', authenticateToken, (req, res) => {
         AND uc.user_id = ?;  -- User filter
     `;
 
-    db.all(sql, [year, month, userId], (err, rows) => {
+    db.all(sql, [year, month, user_id], (err, rows) => {
         if (err) {
             console.error('Error fetching badges:', err.message);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-        console.log('Fetched rows:', rows); // Log fetched rows
-        res.json(rows.length > 0 ? rows : []); // Return results or empty array
+        console.log('Fetched rows:', rows); // Log the fetched rows
+        res.json(rows.length > 0 ? rows : []); // Return the fetched badges or an empty array if none found
     });
 });
-
-// Other badge-related routes (add, update, delete) can follow a similar pattern
-// Ensure that user_id is always passed from the token for these actions
 
 module.exports = router;
