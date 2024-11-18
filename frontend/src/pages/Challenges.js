@@ -24,14 +24,17 @@ const Challenges = () => {
 
   // Use userId for fetching challenges for the authenticated user
   const { challenges, availableChallenges, fetchMyChallenges } = useChallenges(userId); // Pass userId to useChallenges
-  const [searchQuery, setSearchQuery] = useState(""); // Search input value
-  const [filteredChallenges, setFilteredChallenges] = useState([]); // Filtered challenges
+  const [searchMCQuery, setSearchMCQuery] = useState(""); // Search input value
+  const [searchACQuery, setSearchACQuery] = useState(""); // Search input value
+  const [filteredMyChallenges, setFilteredMyChallenges] = useState([]); // Filtered My challenges
+  const [filteredAvailableChallenges, setFilteredAvailableChallenges] = useState([]); // Filtered Available challenges
   const navigate = useNavigate();
 
   // Synchronize filteredChallenges with challenges when challenges update
   useEffect(() => {
-    setFilteredChallenges(challenges);
-  }, [challenges]);
+    setFilteredMyChallenges(challenges);
+    setFilteredAvailableChallenges(availableChallenges);
+  }, [challenges, availableChallenges]);
 
   // Calculate progress percentage for challenges
   const calculateProgressPercentage = (progress, targetValue) => {
@@ -41,9 +44,9 @@ const Challenges = () => {
   };
 
   // Handle search input changes
-  const handleSearchChange = (event) => {
+  const MyChallengeSearchChange = (event) => {
     const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
+    setSearchMCQuery(query);
 
     // Filter challenges based on the search query
     const filtered = challenges.filter(
@@ -53,10 +56,28 @@ const Challenges = () => {
         challenge.challenge_id.toString().includes(query) ||
         challenge.status.toLowerCase().includes(query) ||
         (challenge.progress && challenge.progress.toString().includes(query)) ||
-        (challenge.participants_num && challenge.participants_num.toString().includes(query)) 
+        (challenge.participants_num && challenge.participants_num.toString().includes(query))
     );
+    
+    setFilteredMyChallenges(filtered);
+  };
 
-    setFilteredChallenges(filtered);
+  const AvailChallengeSearchChange = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchACQuery(query);
+
+    // Filter challenges based on the search query
+    const filtered = availableChallenges.filter(
+      (challenge) =>
+        challenge.challenge_type.toLowerCase().includes(query) ||
+        (challenge.distance && challenge.distance.toString().includes(query)) ||
+        challenge.challenge_id.toString().includes(query) ||
+        challenge.status.toLowerCase().includes(query) ||
+        (challenge.progress && challenge.progress.toString().includes(query)) ||
+        (challenge.participants_num && challenge.participants_num.toString().includes(query))
+    );
+    
+    setFilteredAvailableChallenges(filtered);
   };
 
   const refreshAll = () => {
@@ -77,8 +98,7 @@ const Challenges = () => {
       })
       .then((data) => {
         if (data.success) {
-          alert("All Challenges have been updated!");
-          setFilteredChallenges(data.updatedChallenges); 
+          alert("Your Challenges have been updated!");
           fetchMyChallenges(); // Refresh "My Challenges" data
         } else {
           alert(data.message || "Failed to refresh challenges.");
@@ -103,7 +123,7 @@ const Challenges = () => {
       return; 
     }
 
-    fetch(`http://localhost:3000/api/challenges/join-challenge/${challengeId}/${activityId}`, {
+    fetch(`http://localhost:3000/api/challenges/join-challenge/${challengeId}/${activityId}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -128,7 +148,7 @@ const Challenges = () => {
       })
       .catch((error) => {
         console.error("Error joining challenge:", error);
-        alert("An error occurred while joining the challenge.");
+        alert("This challenge has expired, please join other challenges");
       });
   };
 
@@ -142,27 +162,37 @@ const Challenges = () => {
         <div className="my-challenges">
           <NavBar />
           <div className="header-container">
+             {/* <button onClick={refreshAll} className="refresh-button">Refresh All</button> */}
             <h1 className="challenge-title">My Challenges</h1>
           </div>
           <div className="search-container">
             <input
               type="text"
-              placeholder="Search challenges..."
-              value={searchQuery}
-              onChange={handleSearchChange}
+              placeholder="Search My Challenges..."
+              value={searchMCQuery}
+              onChange={MyChallengeSearchChange}
               className="search-bar"
             />
           </div>
           <ChallengeTable
-            challenges={filteredChallenges}
+            challenges={filteredMyChallenges}
             isMyChallenges
             handleViewLeaderboard={handleViewLeaderboard}
             calculateProgressPercentage={calculateProgressPercentage}
             refreshAll={refreshAll}
           />
           <h1 className="challenge-title">Available Challenges</h1>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search Available Challenges..."
+              value={searchACQuery}
+              onChange={AvailChallengeSearchChange}
+              className="search-bar"
+            />
+          </div>
           <ChallengeTable
-            challenges={availableChallenges}
+            challenges={filteredAvailableChallenges}
             joinChallenge={joinChallenge}
             isChallengeJoined={isChallengeJoined}
           />

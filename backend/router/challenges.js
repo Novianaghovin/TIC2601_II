@@ -40,36 +40,56 @@ router.post('/join-challenge/:challengeId/:activityId', authenticateToken, (req,
         return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
-// Check if the user is already part of the challenge
-db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
-    if (err) {
-        console.error('Error checking existing entry:', err.message);
-        return res.status(500).json({ success: false, message: 'Database query failed' });
-    }
-    if (row) {
-        return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
-    }
+    // First, get the challenge deadline
+    db.get('SELECT challenge_deadline FROM avail_challenges WHERE challenge_id = ?', [challengeId], (err, challenge) => {
+        if (err) {
+            console.error('Error fetching challenge deadline:', err.message);
+            return res.status(500).json({ success: false, message: 'Database query failed' });
+        }
+        if (!challenge) {
+            return res.status(404).json({ success: false, message: 'Challenge not found.' });
+        }
 
-    // Insert new entry if not already joined
-    db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
-        [userId, challengeId, activityId, 'Active', '0'], function(err) {
+        const currentDate = new Date();
+        const deadlineDate = new Date(challenge.challenge_deadline);
+
+        // Check if current date is before the deadline
+        if (currentDate > deadlineDate) {
+            return res.status(400).json({ success: false, message: 'This challenge has already expired.' });
+        }
+
+        // Check if the user is already part of the challenge
+        db.get('SELECT * FROM user_challenges WHERE user_id = ? AND challenge_id = ? AND activity_id = ?', [userId, challengeId, activityId], (err, row) => {
             if (err) {
-                console.error('Error joining challenge:', err.message);
-                return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
+                console.error('Error checking existing entry:', err.message);
+                return res.status(500).json({ success: false, message: 'Database query failed' });
+            }
+            if (row) {
+                return res.status(400).json({ success: false, message: 'You have already joined this challenge.' });
             }
 
-            // Increment participants count in the avail_challenges table
-            db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function(err) {
-                if (err) {
-                    console.error('Error updating participants count:', err.message);
-                    return res.status(500).json({ success: false, message: 'Failed to update participants count.' });
+            // Insert new entry if not already joined
+            db.run('INSERT INTO user_challenges (user_id, challenge_id, activity_id, status, progress) VALUES (?, ?, ?, ?, ?)',
+                [userId, challengeId, activityId, 'Active', '0'], function(err) {
+                    if (err) {
+                        console.error('Error joining challenge:', err.message);
+                        return res.status(500).json({ success: false, message: 'Failed to join the challenge.' });
+                    }
+
+                    // Increment participants count in the avail_challenges table
+                    db.run('UPDATE avail_challenges SET participants_num = participants_num + 1 WHERE challenge_id = ?', [challengeId], function(err) {
+                        if (err) {
+                            console.error('Error updating participants count:', err.message);
+                            return res.status(500).json({ success: false, message: 'Failed to update participants count.' });
+                        }
+                        res.json({ success: true, message: 'Successfully joined the challenge!' });
+                    });
                 }
-                res.json({ success: true, message: 'Successfully joined the challenge!' });
-                });
-            }
-        );
+            );
+        });
     });
 });
+
 
 
 // Route to fetch "My Challenges" (challenges the user has joined)
@@ -98,24 +118,20 @@ router.post('/refresh-all', authenticateToken, (req, res) => {
 
     // Fetch all challenges for the user along with their distances, deadlines, and statuses
     const fetchChallengesQuery = `
-        SELECT uc.challenge_id, uc.user_id, uc.status, ac.distance, ac.challenge_deadline
-        FROM user_challenges AS uc
-        JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
-        WHERE uc.user_id = ?`;
+    SELECT uc.challenge_id, uc.user_id, uc.status, ac.distance, ac.challenge_deadline
+    FROM user_challenges AS uc
+    JOIN avail_challenges AS ac ON uc.challenge_id = ac.challenge_id
+    WHERE uc.user_id = ?`;
 
     db.serialize(() => {
-        db.run("BEGIN TRANSACTION;", (err) => {
-            if (err) {
-                console.error("Error starting transaction:", err.message);
-                return res.status(500).json({ success: false, message: "Failed to start transaction." });
-            }
-        });
+        db.run("BEGIN TRANSACTION;");
 
+        // Execute the fetch challenges query
         db.all(fetchChallengesQuery, [userId], (err, challenges) => {
             if (err) {
-                console.error("Error fetching challenges:", err.message);
+                console.error('Error fetching challenges:', err.message);
                 db.run("ROLLBACK;");
-                return res.status(500).json({ success: false, message: "Failed to fetch challenges." });
+                return res.status(500).json({ success: false, message: 'Failed to fetch challenges.' });
             }
 
             challenges.forEach(challenge => {
@@ -123,29 +139,39 @@ router.post('/refresh-all', authenticateToken, (req, res) => {
                 const currentDate = new Date();
                 const deadlineDate = new Date(challenge_deadline);
 
-                if (currentDate > deadlineDate && status !== 'Expired') {
-                    // Update both `user_challenges` and `avail_challenges` to 'Expired'
-                    const updateExpiredStatusQueries = `
-                        UPDATE user_challenges SET status = 'Expired' WHERE user_id = ? AND challenge_id = ?;
-                        UPDATE avail_challenges SET status = 'Expired' WHERE challenge_id = ?;`;
-                    db.exec(updateExpiredStatusQueries, [user_id, challenge_id, challenge_id], (err) => {
+                if (currentDate > deadlineDate) {
+                    if (status !== 'Expired') {
+                        // If the user challenge has passed its deadline and is not already expired, mark it as expired
+                        const updateExpiredStatus = `UPDATE user_challenges SET status = 'Expired' WHERE user_id = ? AND challenge_id = ?`;
+                        db.run(updateExpiredStatus, [user_id, challenge_id], function(err) {
+                            if (err) {
+                                console.error('Error updating user challenge status to Expired:', err.message);
+                                db.run("ROLLBACK;");
+                                return;
+                            }
+                        });
+                    }
+
+                    // Update the avail_challenges table to mark the challenge as expired
+                    const updateAvailChallengesStatus = `UPDATE avail_challenges SET status = 'Expired' WHERE challenge_id = ?`;
+                    db.run(updateAvailChallengesStatus, [challenge_id], function(err) {
                         if (err) {
-                            console.error("Error updating challenges to Expired:", err.message);
+                            console.error('Error updating avail_challenges status to Expired:', err.message);
                             db.run("ROLLBACK;");
                             return;
                         }
                     });
                 } else if (status !== 'Expired') {
-                    // Calculate and update progress for active challenges
+                    // Only calculate and update progress for challenges that are not expired
                     const totalDistanceQuery = `
-                        SELECT SUM(al.distance) AS totalDistance
-                        FROM activity_log AS al
-                        WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= 
-                        (SELECT joined_at FROM user_challenges WHERE user_id = ? AND challenge_id = ?)`;
+                    SELECT SUM(al.distance) AS totalDistance
+                    FROM activity_log AS al
+                    WHERE al.user_id = ? AND al.timestamp <= ? AND al.timestamp >= 
+                    (SELECT joined_at FROM user_challenges WHERE user_id = ? AND challenge_id = ?)`;
 
                     db.get(totalDistanceQuery, [user_id, challenge_deadline, user_id, challenge_id], (err, row) => {
                         if (err) {
-                            console.error("Error calculating total distance:", err.message);
+                            console.error('Error calculating total distance:', err.message);
                             db.run("ROLLBACK;");
                             return;
                         }
@@ -155,28 +181,24 @@ router.post('/refresh-all', authenticateToken, (req, res) => {
                         progress = progress > 100 ? 100 : progress;
                         const newStatus = progress >= 100 ? 'Completed' : 'Active';
 
-                        db.run(
-                            `UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`,
-                            [progress, newStatus, user_id, challenge_id],
-                            function (err) {
+                        db.run(`UPDATE user_challenges SET progress = ?, status = ? WHERE user_id = ? AND challenge_id = ?`, 
+                            [progress, newStatus, user_id, challenge_id], function(err) {
                                 if (err) {
-                                    console.error("Error updating progress and status:", err.message);
+                                    console.error('Error updating progress and status:', err.message);
                                     db.run("ROLLBACK;");
                                     return;
                                 }
-                            }
-                        );
+                        });
                     });
                 }
             });
-
             db.run("COMMIT;", (err) => {
                 if (err) {
-                    console.error("Error during COMMIT:", err.message);
+                    console.error('Error during COMMIT:', err.message);
                     db.run("ROLLBACK;");
-                    return res.status(500).json({ success: false, message: "Failed to commit transaction." });
+                    return res.status(500).json({ success: false, message: 'Failed to commit transaction.' });
                 }
-                res.json({ success: true, message: "Progress and status updates completed successfully." });
+                res.json({ success: true, message: 'Progress updates completed, and challenges updated as needed.' });
             });
         });
     });
