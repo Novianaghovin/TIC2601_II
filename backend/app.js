@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const path = require('path');
+//const cron = require('node-cron');
 
 const corsOptions = {
     origin: 'http://localhost:3000', // Allow requests from this origin
@@ -21,6 +22,8 @@ const goals = require('./router/goals');
 const Challenges = require('./router/challenges');
 const Leaderboard = require('./router/leaderboard');
 const badge = require('./router/badgeYearly');
+const watcher = require('./router/watcher_leaderboard');
+//const updateRanks = require('./router/rankUpdate');
 
 app.use('/user', user);
 app.use('/friends', friend);
@@ -31,6 +34,17 @@ app.use('/api/goals', goals);
 app.use('/api/challenges', Challenges);
 app.use('/api/leaderboard', Leaderboard);
 app.use('/api', badge);
+
+// Start the database watcher
+watcher.startDatabaseWatcher();
+
+/*
+// Schedule to run on the 1st day of every month at 00:00
+cron.schedule('0 0 1 * *', () => {
+    console.log('Running monthly rank update...');
+    updateRanks();
+});
+*/
 
 const port = 3001;
 app.listen(port, () => {
