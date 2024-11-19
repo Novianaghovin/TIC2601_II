@@ -1,125 +1,93 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// BadgeTable.js
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import NavBar from "../components/Shared/Navbar";
-import Badge from "./badgeMonthly";
-import './badgeMonthly.css';
+import NavBar from "../components/Shared/Navbar"; // Importing NavBar
+import BadgeForm from './BadgeForm'; // Import BadgeForm component
+import BadgeList from './BadgeList'; // Import BadgeList component
 
-function Badges() {
-    const currentDate = new Date();
-    const currentMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed, so add 1
-    const currentYear = currentDate.getFullYear().toString();
+// Importing badge images
+import badge5kmColor from './5km-color.jpg';
+import badge10kmColor from './10km-color.jpg';
+import badge21kmColor from './21km-color.jpg';
+import badge10kStepsColor from './10ksteps-color.jpg';
+import badge20kStepsColor from './20ksteps-color.jpg';
+import badge30kStepsColor from './30ksteps-color.jpg';
 
+const BadgeTable = () => {
+    const [month, setMonth] = useState('');
+    const [year, setYear] = useState('');
     const [badges, setBadges] = useState([]);
-    const [month, setMonth] = useState(currentMonth); // Default to current month
-    const [year, setYear] = useState(currentYear); // Default to current year
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // useCallback ensures fetchBadges doesn't change on each render
-    const fetchBadges = useCallback(async () => {
+    const fetchBadges = async () => {
+        if (!month || !year) {
+            setError('Please select both month and year.');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
-        // Retrieve token from localStorage
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            console.error('No token found');
-            setError('No token found');
+            setError('No access token found.');
             setLoading(false);
             return;
         }
 
         try {
-            const userId = 1; // Assuming you have a way to retrieve the user's ID (e.g., from the token or state)
-            const response = await axios.get(`http://localhost:3001/api/badgeCompleted/${userId}/${month}/${year}`, {
+            const response = await axios.get(`http://localhost:3000/api/badgeCompleted/${month}/${year}`, {
                 headers: {
-                    Authorization: `Bearer ${token}` // Include token in Authorization header
+                    Authorization: `Bearer ${token}`
                 }
             });
             setBadges(response.data);
-        } catch (error) {
-            console.error("Error fetching badges:", error);
+        } catch (err) {
             setError('Error fetching badges');
+            console.error(err);
         } finally {
             setLoading(false);
         }
-    }, [month, year]); // Re-run when month or year changes
+    };
+
+    const badgeImages = {
+        '5km running': badge5kmColor,
+        '10km running': badge10kmColor,
+        '21km running': badge21kmColor,
+        '10k steps walking': badge10kStepsColor,
+        '20k steps walking': badge20kStepsColor,
+        '30k steps walking': badge30kStepsColor,
+    };
 
     useEffect(() => {
         fetchBadges();
-    }, [fetchBadges]);
+    }, [month, year]);
 
-    const handleMonthChange = (e) => {
-        setMonth(e.target.value);
-    };
-
-    const handleYearChange = (e) => {
-        setYear(e.target.value);
-    };
-
-    const handleFilterClick = () => {
-        fetchBadges(); // Trigger fetching with selected filters
-    };
+    const handleMonthChange = (e) => setMonth(e.target.value);
+    const handleYearChange = (e) => setYear(e.target.value);
+    const handleFilterClick = () => fetchBadges();
 
     return (
         <div>
-            <NavBar />
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-                <h1>Completed Badges</h1>
+            <NavBar /> {/* Add NavBar component at the top */}
 
-                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={{ fontSize: '18px', fontWeight: 'bold' }}>Month</label>
-                        <select value={month} onChange={handleMonthChange} style={{ fontSize: '16px' }}>
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <label style={{ fontSize: '18px', fontWeight: 'bold' }}>Year</label>
-                        <select value={year} onChange={handleYearChange} style={{ fontSize: '16px' }}>
-                            <option value="2023">2023</option>
-                            <option value="2024">2024</option>
-                        </select>
-                    </div>
-
-                    <button onClick={handleFilterClick} style={{ height: '35px', width: '100px', fontSize: '16px' }}>
-                        Filter
-                    </button>
-                </div>
+            <div style={{ marginTop: '80px' }}>
+                <BadgeForm 
+                    month={month}
+                    year={year}
+                    onMonthChange={handleMonthChange}
+                    onYearChange={handleYearChange}
+                    onFetch={handleFilterClick}
+                />
 
                 {loading && <p>Loading...</p>}
                 {error && <p>{error}</p>}
 
-                {badges.length > 0 ? (
-                    <div className="badge-list">
-                        {badges.map((badge, index) => (
-                            <Badge
-                                key={index}
-                                badgeName={badge.badge_name}
-                                status={badge.status}
-                                progress={badge.progress}
-                                time_stamp={badge.time_stamp}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <p>No badges found for the selected filters.</p>
-                )}
+                <BadgeList badges={badges} badgeImages={badgeImages} />
             </div>
         </div>
     );
-}
+};
 
-export default Badges;
+export default BadgeTable;
