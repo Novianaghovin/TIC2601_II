@@ -10,45 +10,54 @@ const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) =>
         console.error('Error opening database: ' + err.message);
         process.exit(1); // Exit process if database connection fails
     } else {
-        console.log('Connected to the database.');
+        console.log('Connected to the database badgeNEW.');
     }
 });
 
-// Middleware to parse JSON requests (if needed)
+
+// Middleware to parse JSON requests
 router.use(express.json());
 
-// Route: Get all completed badges for a specific user, month, and year
-router.get('/badgeCompleted/:user_id/:month/:year', authenticateToken, (req, res) => {
-    const { user_id, month, year } = req.params; // Get user_id, month, and year from URL parameters
-    console.log(`Received request for user_id: ${user_id}, month: ${month}, year: ${year}`); // Log parameters
+router.get('/badgeCompleted/:month/:year', authenticateToken, (req, res) => {
+    const { month, year } = req.params; // Get month and year from URL params
+    const { userId } = req.user; // Access the userId from the token payload (use userId, not user_id)
 
-    // SQL Query to fetch completed badges for the specific user, month, and year
+    console.log(`Received request for user_id: ${userId}, month: ${month}, year: ${year}`); // Log the userId
+
+    // SQL query to fetch completed badges for the specific user, month, and year
     const sql = `
-    SELECT DISTINCT 
-        uc.user_id, 
-        uc.status, 
-        uc.progress, 
-        lb.time_stamp
-    FROM 
-        user_challenges uc
-    JOIN 
-        leaderboard lb ON uc.user_id = lb.user_id AND uc.challenge_id = lb.challenge_id
-    WHERE 
-        uc.status = 'Completed'
-        AND strftime('%Y', lb.time_stamp) = ?  -- Year filter
-        AND strftime('%m', lb.time_stamp) = ?  -- Month filter
-        AND uc.user_id = ?;  -- User filter
+        SELECT DISTINCT 
+            uc.user_id, 
+            uc.status, 
+            uc.progress, 
+            lb.time_stamp,
+            bt.badge_name
+        FROM 
+            user_challenges uc
+        JOIN 
+            leaderboard lb ON uc.user_id = lb.user_id AND uc.challenge_id = lb.challenge_id
+        JOIN
+            avail_challenges ac ON uc.challenge_id = ac.challenge_id
+        JOIN
+            badge_type bt ON ac.badge_id = bt.badge_id
+        WHERE 
+            uc.status = 'Completed'
+            AND strftime('%Y', lb.time_stamp) = ?  -- Filter by year
+            AND strftime('%m', lb.time_stamp) = ?  -- Filter by month
+            AND uc.user_id = ?;  -- Filter by userId (not user_id)
     `;
 
-    db.all(sql, [year, month, user_id], (err, rows) => {
+    // Execute the SQL query with parameters
+    db.all(sql, [year, month, userId], (err, rows) => {
         if (err) {
             console.error('Error fetching badges:', err.message);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-        console.log('Fetched rows:', rows); // Log the fetched rows
-        res.json(rows.length > 0 ? rows : []); // Return the fetched badges or an empty array if none found
+        console.log('Fetched rows:', rows);
+        res.json(rows.length > 0 ? rows : []); // Return the badges or an empty array if none found
     });
 });
+
 
 module.exports = router;
