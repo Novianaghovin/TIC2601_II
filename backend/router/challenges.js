@@ -12,7 +12,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     if (err) {
         console.error('Error connecting to the database:', err.message);
     } else {
-        console.log('Connected to the database successfully.');
+        console.log('challenges connected to the database.');
     }
 });
 

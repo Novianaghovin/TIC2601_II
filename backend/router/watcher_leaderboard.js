@@ -11,7 +11,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('Error opening database: ' + err.message);
         process.exit(1); // Exit process if database connection fails
     } else {
-        console.log('Connected to the database watcher.');
+        console.log('watcher_leaderboard connected to the database.');
     }
 });
 function handleDatabaseChange() {

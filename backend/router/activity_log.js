@@ -10,7 +10,7 @@ const db = new sqlite3.Database(path.join(__dirname, '../database.db'), (err) =>
         console.error('Error opening database: ' + err.message);
         process.exit(1); // Exit process if database connection fails
     } else {
-        console.log('Connected to the database.');
+        console.log('activity_log connected to the database.');
     }
 });
 

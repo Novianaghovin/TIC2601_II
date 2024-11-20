@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const path = require('path');
-//const cron = require('node-cron');
 
 const corsOptions = {
     origin: 'http://localhost:3000', // Allow requests from this origin
@@ -18,19 +17,16 @@ const friend = require('./router/friends');
 const activityType = require('./router/activity_type');
 const activityLog = require('./router/activity_log');
 const goals = require('./router/goals');
-// const badgeRouter = require('./router/badge');
 const Challenges = require('./router/challenges');
 const Leaderboard = require('./router/leaderboard');
 const badge = require('./router/badgeYearly');
 const watcher = require('./router/watcher_leaderboard');
-//const updateRanks = require('./router/rankUpdate');
 
 app.use('/user', user);
 app.use('/friends', friend);
 app.use('/api/activity_type', activityType);
 app.use('/api/activity_log', activityLog);
 app.use('/api/goals', goals);
-// app.use(badgeRouter);   //badge alrd exist in the file not require to input
 app.use('/api/challenges', Challenges);
 app.use('/api/leaderboard', Leaderboard);
 app.use('/api', badge);
