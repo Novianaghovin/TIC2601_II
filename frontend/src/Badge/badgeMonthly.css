@@ -1,0 +1,89 @@
+/* Navbar Styling */
+.navbar {
+    position: fixed; /* Fix the navbar at the top */
+    top: 0; /* Align it to the top of the page */
+    left: 0; /* Align it to the left */
+    width: 100%; /* Make the navbar full width */
+    padding: 10px 20px; /* Padding for the navbar */
+    color: white; /* White text */
+    z-index: 1000; /* Ensure it's on top of other content */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow effect */
+}
+
+/* Adjust body content to avoid navbar overlap */
+body {
+    padding-top: 60px; /* Add padding to the top of the body so content doesn't get hidden behind the fixed navbar */
+}
+
+
+/* Badge Container - Grid Layout */
+.badge-container {
+    display: grid; /* Use grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Adjust min width to avoid overlap */
+    gap: 20px; /* Increased space between badges */
+    justify-items: center; /* Center badges horizontally */
+    margin-top: 20px; /* Add spacing above */
+}
+
+/* Individual Badge Styling */
+.badge-item {
+    width: 120px; /* Adjust this width to fit the badge size */
+    text-align: center; /* Center content */
+    display: flex;
+    flex-direction: column; /* Stack image and text */
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effect for badge item */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Badge Icon (Image) Styling */
+.badge-icon img {
+    width: 120px; /* Adjust the size of the logo */
+    height: 120px; /* Adjust the height accordingly */
+    border-radius: 50%; /* Make images circular */
+    object-fit: cover; /* Keep aspect ratio */
+    transition: transform 0.3s ease, filter 0.3s ease; /* Smooth hover animation */
+}
+
+/* Badge Info Box Styling (Button-like) */
+.badge-info-box {
+    background-color: #333; /* Dark gray background */
+    padding: 12px 18px; /* Adjusted padding for a button feel */
+    border-radius: 25px; /* Rounded corners to make it more button-like */
+    font-size: 14px; /* Font size for readability */
+    color: #fff; /* White text color */
+    display: flex; /* Flexbox to align label and timestamp */
+    flex-direction: column; /* Stack label and timestamp vertically */
+    align-items: center; /* Center text horizontally */
+    gap: 5px; /* Space between label and timestamp */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+    cursor: pointer; /* Pointer cursor to indicate clickable */
+}
+
+/* Hover effect to make it feel like a button */
+.badge-info-box:hover {
+    background-color: #444; /* Darker gray background on hover */
+    transform: scale(1.1); /* Enlarge the box on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Increase shadow for a button press effect */
+}
+
+/* Badge Info Box Text (Achieved On) Styling */
+.badge-info-box p {
+    font-weight: bold; /* Bold label */
+    color: #fff; /* White color for "Achieved On" label */
+    margin: 0; /* Remove default margin */
+}
+
+/* Timestamp Styling */
+.badge-info-box div {
+    font-size: 12px; /* Smaller font for timestamp */
+    color: #fff; /* White color for timestamp */
+    font-style: italic; /* Italicize the timestamp */
+}
+
+/* Optional: Add a subtle underline to the label on hover */
+.badge-info-box p:hover {
+    text-decoration: underline;
+}

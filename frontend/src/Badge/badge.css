@@ -1,0 +1,77 @@
+/* General Page Styling */
+.page-container {
+    width: 100%;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Buttons Styling */
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .month-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .month-button.active {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  /* Badge Container - Flexbox Layout */
+  .badge-container {
+    display: flex;
+    justify-content: center; /* Center the badges horizontally */
+    flex-wrap: wrap; /* Allow wrapping to the next line if the screen is small */
+    gap: 20px; /* Space between the badges */
+    margin-top: 20px;
+  }
+  
+  /* Styling for individual badge */
+  .badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none; /* No background */
+    border: none; /* No border */
+    padding: 0; /* No padding */
+  }
+  
+  /* Badge Image Styling - Larger Size */
+  .badge-icon {
+    width: 150px; /* Larger width of the badge images */
+    height: 150px; /* Larger height of the badge images */
+    border-radius: 50%; /* Rounded shape */
+    object-fit: cover; /* Maintain aspect ratio and fill the circle */
+    margin-bottom: 10px; /* Space between the image and text */
+  }
+  
+  .achieved {
+    /* Optional: Styling for achieved badges */
+  }
+  
+  .not-achieved {
+    /* Optional: Styling for unachieved badges */
+  }
+  
+  /* Badge Information Styling */
+  .badge-info p {
+    font-size: 14px;
+    color: #333;
+  }
+  

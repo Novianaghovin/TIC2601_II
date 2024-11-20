@@ -18,7 +18,7 @@ CREATE TABLE user_profile (
         ON UPDATE CASCADE
 );
 
--- INSERT 100 USER DATA
+-- INSERT TEST USER DATA
 INSERT INTO user_registration (first_name, last_name, email, password) VALUES
 ('Liam', 'OConnor', 'ostrichclimbing@gmail.com', 'password1'),
 ('Aisha', 'Khan', 'penguinparade@hotmail.com', 'password2'),
@@ -82,8 +82,3 @@ INSERT INTO user_profile (user_id, dob, gender, height, weight, nationality) VAL
 (28, '1994-07-25', 'Female', 164, 64, 'Germany'),
 (29, '1995-08-19', 'Male', 179, 73, 'Japan'),
 (30, '1996-09-14', 'Female', 165, 55, 'South Korea');
-(96, '1992-03-15', 'Female', 163, 60, 'Malaysia'),
-(97, '1993-04-20', 'Male', 180, 82, 'Thailand'),
-(98, '1994-05-28', 'Female', 168, 66, 'Mexico'),
-(99, '1995-06-30', 'Male', 178, 75, 'Indonesia'),
-(100, '1996-07-18', 'Female', 164, 62, 'Singapore');
