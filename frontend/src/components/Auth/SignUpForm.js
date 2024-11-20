@@ -88,7 +88,7 @@ const SignUpForm = ({ togglePanel }) => {
         value={formData.password}
         onChange={handleChange}
       />
-      <button type="submit">Sign Up</button>
+      <button type="submit" className="signin-button">Sign Up</button>
     </form>
   );
 };

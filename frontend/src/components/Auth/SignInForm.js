@@ -49,7 +49,7 @@ const SignInForm = ({ togglePanel, onLoginSuccess }) => {
         onChange={(e) => setPassword(e.target.value)} 
         required 
       />
-      <button type="submit">Sign In</button>
+      <button type="submit" className="signin-button">Sign In</button>
     </form>
   );
 };

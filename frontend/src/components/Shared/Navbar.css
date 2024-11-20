@@ -65,8 +65,8 @@
 }
 
 .cancel-button {
-  background-color: #fff;
-  color: black;
+  background-color: #fff !important;
+  color: black !important;
   font-size: 15px; 
   padding: 10px 26px; 
   border-radius: 8px;

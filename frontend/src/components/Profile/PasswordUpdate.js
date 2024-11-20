@@ -81,7 +81,7 @@ const PasswordUpdateForm = () => {
       </div>
 
       <button className="btn btn-primary" style={{ marginTop: "20px" }} onClick={handlePasswordUpdate}>
-        Update Password
+        UPDATE PASSWORD
       </button>
     </div>
   );
