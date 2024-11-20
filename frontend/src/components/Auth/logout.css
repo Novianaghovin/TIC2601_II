@@ -24,21 +24,21 @@
     font-weight: 400;
   }
 
-  .button-group button {
+  .logout-overlay .button-group button {
     margin: 15px;
     padding: 10px 20px;
     font-size: 15px;
     cursor: pointer;
   }
   
-  .button-group button:first-child {
+  .logout-overlay .button-group button:first-child {
     background-color: #FF4B2B;
     color: white;
     border: none;
   }
   
-  .button-group button:last-child {
-    background-color: #f0f0f0;
+  .logout-overlay .button-group button:last-child {
+    background-color: #ddd;
     color: black;
     border: none;
   }

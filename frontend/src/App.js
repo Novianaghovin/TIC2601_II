@@ -5,12 +5,15 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import WelcomePage from './components/Welcome/WelcomePage';
 import FriendPage from './pages/FriendPage';
-
+import ActivityLog from './pages/ActivityLog';
+import Goals from './pages/Goals';
+import Challenges from './pages/Challenges';
+import Badges from './Badge/badgesMonthly';
 
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`; 
   }
   return config;
 }, (error) => Promise.reject(error));
@@ -22,10 +25,11 @@ const App = () => {
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/friends" element={<FriendPage />} />
-          {/* <Route path="/badges" element={<Badges />} />
-          <Route path="/challenges" element={<Challenges />} /> */}
-          {/* Default Route */}
-          {/* <Route path="/" element={<h1>Welcome to the Dashboard</h1>} /> */}
+          <Route path="/activities" element={<ActivityLog />} />
+          <Route path="/goals" element={<Goals />} />
+          <Route path="/challenges/*" element={<Challenges />} /> 
+          <Route path="/badges" element={<Badges />} />
+          {<Route path="/" element={<h1>Welcome to the Dashboard</h1>} />}
         </Routes>
   );
 };

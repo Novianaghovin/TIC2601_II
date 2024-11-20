@@ -41,7 +41,7 @@ const PendingRequests = ({ pendingRequests, onAccept, onReject, onPageChange, cu
                 <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
                 <span>Page {currentPage} of {totalPages > 0 ? totalPages : 1}</span>
                 <button onClick={() => onPageChange(currentPage + 1)} 
-                    disabled={currentPage === totalPages || totalPages === 1}>Next</button>
+                    disabled={currentPage === totalPages || totalPages === 0}>Next</button>
             </div>
         </div>
     );

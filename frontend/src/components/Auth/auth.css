@@ -43,7 +43,7 @@ p {
     margin-bottom: 30px; 
 }
 
-button {
+.signin-button, .ghost-button {
 	border-radius: 20px;
 	border: 1px solid #FF4B2B;
 	background-color: #FF4B2B;
@@ -56,15 +56,15 @@ button {
 	transition: transform 80ms ease-in;
 }
 
-button:active {
+.overlay-panel .ghost-button:active {
 	transform: scale(0.95);
 }
 
-button:focus {
+.overlay-panel .ghost-button:focus {
 	outline: none;
 }
 
-button.ghost {
+.overlay-panel .ghost-button {
 	background-color: transparent;
 	border-color: #FFFFFF;
 }
@@ -171,29 +171,6 @@ label {
     font-size: 12px;
     margin: 8px 0;
     display: block; /* Ensure label is block-level to separate from input */
-}
-
-
-button {
-    border-radius: 20px;
-    border: 1px solid #FF4B2B;
-    background-color: #FF4B2B;
-    color: #FFFFFF;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 12px 45px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: transform 80ms ease-in;
-    cursor: pointer;
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-button:focus {
-    outline: none;
 }
 
 @keyframes show {

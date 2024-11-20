@@ -45,7 +45,8 @@
 }
 
 .greeting h1 {
-  font-size: 12rem;
+  font-size: 14rem;
+  color: white;
   margin: 0;
   font-weight: 400;
 }

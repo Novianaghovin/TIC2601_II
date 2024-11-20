@@ -1,0 +1,83 @@
+.my-challenges {
+  display: block; /* Override Flexbox or Grid */
+  text-align: center; /* Center-align all child elements */
+}
+
+
+/* Remove Background from Container */
+.header-container {
+  display: flex;
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center content horizontally */
+  position: relative; /* Allow positioning of button */
+  width: 100%; /* Ensure the container spans the full width */
+}
+
+/* Titles */
+.challenge-title {
+  font-size: 50px;
+  margin-bottom: 10px;
+  text-align: center !important;
+  color: #000000;
+  width: 100%; /* Ensure the title spans the entire width of the container */
+  display: block; /* Ensure the title behaves like a block-level element */
+}
+
+/* Search Bar */
+.search-container .search-bar {
+  width: 300px;
+  max-width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px; 
+}
+
+/* Buttons */
+.my-challenges-button {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #fff;
+  background-color: #FF4B2B;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.my-challenges-button:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #fff; /* Keep table background white */
+  box-shadow: none; /* Remove shadow */
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+th {
+  background-color: #007BFF;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}

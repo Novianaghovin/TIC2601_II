@@ -1,0 +1,57 @@
+/* Badge Container - Grid Layout */
+.badge-container {
+  display: grid; /* Use grid layout */
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Adjust min width to avoid overlap */
+  gap: 20px; /* Increased space between badges */
+  justify-items: center; /* Center badges horizontally */
+  margin-top: 20px; /* Add spacing above */
+}
+
+/* Individual Badge Styling */
+.badge-item {
+  width: 120px; /* Adjust this width to fit the badge size */
+  text-align: center; /* Center content */
+  display: flex;
+  flex-direction: column; /* Stack image and text */
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effect for badge item */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Badge Icon (Image) Styling */
+.badge-icon img {
+  width: 120px; /* Adjust the size of the logo */
+  height: 120px; /* Adjust the height accordingly */
+  border-radius: 50%; /* Make images circular */
+  object-fit: cover; /* Keep aspect ratio */
+  transition: transform 0.3s ease, filter 0.3s ease; /* Smooth hover animation */
+}
+
+/* Badge Info Text Styling */
+.badge-info p {
+  font-size: 11px; /* Smaller font for badge info */
+  color: #555; /* Neutral color */
+  margin-top: 5px; /* Space between badge image and text */
+}
+
+/* Hover Effects for Logo Only */
+.badge-icon img:hover {
+  transform: scale(1.2); /* Slightly enlarge the logo on hover */
+  filter: brightness(1.2); /* Brighten logo */
+}
+
+/* Optional: Highlight Badge Item on Hover */
+.badge-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add subtle shadow */
+}
+
+/* Badge Grid Wrapper */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Adjust columns based on badge size */
+  gap: 20px; /* Increased gap for spacing */
+  width: 100%;
+  max-width: 800px; /* Optional: Restrict grid width */
+  margin: 0 auto;
+}
